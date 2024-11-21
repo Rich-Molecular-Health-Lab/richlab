@@ -2,4 +2,10 @@
 git init
 git remote add origin https://github.com/Rich-Molecular-Health-Lab/richlab.git
 
+git branch -M main
+
 git add .
+
+git commit -m "first commit"
+
+git push origin main
