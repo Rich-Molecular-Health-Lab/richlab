@@ -126,3 +126,14 @@ load.pkg <- function(pkg) {
   
   return(output)
 }
+
+# Create a nested Markdown list
+render_nested_list <- function(parent) {
+  paste(
+    unlist(lapply(names(parent), function(section) {
+      paste0("- **", section, "**:\n", 
+             paste("  -", parent[[section]], collapse = "\n"))
+    })), 
+    collapse = "\n"
+  )
+}

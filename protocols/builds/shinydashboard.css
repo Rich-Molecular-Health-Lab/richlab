@@ -1,0 +1,9 @@
+html, body, .content-wrapper, .main-sidebar, .main-header {
+  height: 100vh !important;
+  overflow: hidden;
+}
+
+.content {
+  height: calc(100vh - 50px) !important; /* Adjust for header height */
+  overflow: auto;
+}

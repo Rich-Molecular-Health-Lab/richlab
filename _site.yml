@@ -1,0 +1,15 @@
+name: "richlab_main"
+output_dir: "."
+navbar:
+  title: "Rich Lab Homepage"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "People"
+      href: people.html
+    - text: "Projects"
+      href: projects.html
+    - text: "For Lab Members"
+      href: members.html
+    - text: "For Dr. Rich's Classes"
+      href: teaching.html

@@ -1,0 +1,7 @@
+source(paste0(params$local, "protocols/builds/Supplies_SQK_LSK114.R"))
+source(paste0(params$local, "protocols/builds/FlowCellCheck_SQK_LSK114.R"))
+source(paste0(params$local, "protocols/builds/Input_SQK_LSK114.R"))
+source(paste0(params$local, "protocols/builds/KitContents_SQK_LSK114.R"))
+source(paste0(params$local, "protocols/builds/RxnMix_EndPrep_SQK_LSK114.R"))
+source(paste0(params$local, "protocols/builds/RxnMix_AdapterLigation_SQK_LSK114.R"))
+source(paste0(params$local, "protocols/builds/RxnMix_FlowCell_SQK_LSK114.R"))

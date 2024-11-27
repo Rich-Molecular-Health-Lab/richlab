@@ -1,0 +1,179 @@
+---
+title: "Protocol for Library Prep: Bacterial Genome using LSK114 on MinION"
+author: "Alicia M. Rich, Ph.D."
+date: "`r Sys.Date()`"
+output: html_document
+runtime: shiny
+params:
+  local: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  laptop: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  desktop: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+  
+---
+
+```{r global, include=F}
+params <- list(
+  local = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  laptop = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  desktop = "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+)
+
+source(paste0(params$local, "dependencies/setup.R"))
+opts_chunk$set(message = FALSE,
+               warning = FALSE,
+               echo    = FALSE,
+               include = TRUE,
+               eval    = TRUE)
+source(paste0(params$local, "protocols/builds/Build_Protocol_SQK_LSK114.R"))
+```
+
+```{r}
+dashboardSidebar <- dashboardSidebar(
+  sidebarMenu(
+      menuItem("Overview"         , tabName = "overview", icon = icon("dashboard")),
+      menuItem("End Prep"         , tabName = "endprep" , icon = icon("th")),
+      menuItem("Adapter Ligation" , tabName = "adapter" , icon = icon("th")),
+      menuItem("Library Cleanup"  , tabName = "cleanup" , icon = icon("th")),
+      menuItem("Load Flow Cell"   , tabName = "flowcell", icon = icon("th"))))
+```
+
+
+```{r}
+overview.tab <- tabItem(tabName = "overview",
+        tabBox(height = "calc(100vh - 200px)",
+          tabPanel(
+            "Equipment, Materials, and Consumables",
+            gt_output(outputId = "supplies_all")
+          ),
+          tabPanel(
+            "Input DNA",
+            gt_output(outputId = "input_dna")
+          ),
+          tabPanel(
+            "SQK-LSK114 Contents",
+            fluidRow(box(gt_output(outputId = "kit_contents")), 
+                     box(imageOutput("LSK114_tubes")))
+           )
+     )
+)
+```
+
+```{r}
+endprep.tab <- tabItem(tabName = "endprep",
+  box(title = "Materials and Consumables", collapsible = TRUE, height = "calc(100vh - 200px)",
+      gt_output(outputId = "supplies_endprep"),
+            box(title = "Tip from ONT",
+                status = "info",
+                "ONT recommends using the NEBNext® Companion Module v2 for Oxford Nanopore Technologies® Ligation Sequencing (E7672S/E7672L), which contains all the NEB reagents needed for use with the Ligation Sequencing Kit.", br(),
+                "The previous version, NEBNext® Companion Module for Oxford Nanopore Technologies® Ligation Sequencing (NEB, E7180S/E7180L) is also compatible, but the recommended v2 module offers more efficient dA-tailing and ligation."),
+            box(title = "Tip from ONT",
+                status = "info",
+                "ONT recommends using the DNA Control Sample (DCS) in your library prep for troubleshooting purposes.", br(),
+                "You can also omit this step and make up the extra 1 µl with your sample DNA, if preferred.")
+      ),
+box(title = "Procedure",
+ tags$ol(
+   tags$li(checkboxInput("1a", "Thaw DNA Control Sample (DCS) at room temperature, spin down, mix by pipetting, and place on ice.")),
+   tags$li(checkboxInput("1b", "Prepare the NEB reagents in accordance with manufacturer’s instructions, and place on ice."),
+     tags$ol(
+       tags$li("Thaw all reagents on ice."),
+       tags$li("Flick and/or invert the reagent tubes to ensure they are well mixed.",
+               br(),
+               "Note: Do not vortex the FFPE DNA Repair Mix or Ultra II End Prep Enzyme Mix."),
+       tags$li("Always spin down tubes before opening for the first time each day."),
+       tags$li("Vortex the FFPE DNA Repair Buffer v2, or the NEBNext FFPE DNA Repair Buffer and Ultra II End Prep Reaction Buffer to ensure they are well mixed.",
+               br(),
+               "Note: These buffers may contain a white precipitate. If this occurs, allow the mixture(s) to come to room temperature and pipette the buffer several times to break up the precipitate, followed by a quick vortex to mix."),
+            tags$li("The FFPE DNA Repair Buffer may have a yellow tinge and is fine to use if yellow.")
+      )),
+   tags$li(checkboxInput("1c", "Prepare the DNA in nuclease-free water."),
+      tags$ol(
+        tags$li("Transfer 1 μg (or 100-200 fmol) input DNA into a 1.5 ml Eppendorf DNA LoBind tube."),
+        tags$li("Adjust the volume to 47 μl with nuclease-free water."),
+        tags$li("Mix thoroughly by pipetting up and down, or by flicking the tube."),
+        tags$li("Spin down briefly in a microfuge.")
+      )),
+   tags$li(checkboxInput("1d", "In a 0.2 ml thin-walled PCR tube, prepare the reaction mix."),
+        gt_output("endprep_mix")),
+   tags$li(checkboxInput("1e", "Thoroughly mix the reaction by gently pipetting and briefly spinning down.")),
+   tags$li(checkboxInput("1f", "Using a thermal cycler, incubate at 20°C for 5 minutes and 65°C for 5 minutes.")),
+   tags$li(checkboxInput("1g", "Resuspend the AMPure XP Beads (AXP) by vortexing.")),
+   tags$li(checkboxInput("1h", "Transfer the DNA sample to a clean 1.5 ml Eppendorf DNA LoBind tube.")),
+   tags$li(checkboxInput("1i", "Add 60 µl of resuspended the AMPure XP Beads (AXP) to the end-prep reaction and mix by flicking the tube.")),
+   tags$li(checkboxInput("1j", "Incubate on a Hula mixer (rotator mixer) for 5 minutes at room temperature.")),
+   tags$li(checkboxInput("1k", "Prepare 500 μl of fresh 80% ethanol in nuclease-free water.")),
+   tags$li(checkboxInput("1l", "Spin down the sample and pellet on a magnet until supernatant is clear and colourless. Keep the tube on the magnet, and pipette off the supernatant.")),
+   tags$li(checkboxInput("1m", "Keep the tube on the magnet and wash the beads with 200 µl of freshly prepared 80% ethanol without disturbing the pellet. Remove the ethanol using a pipette and discard.")),
+   tags$li(checkboxInput("1n", "Repeat the previous step.")),
+   tags$li(checkboxInput("1o", "Spin down and place the tube back on the magnet. Pipette off any residual ethanol. Allow to dry for ~30 seconds, but do not dry the pellet to the point of cracking.")),
+   tags$li(checkboxInput("1p", "Remove the tube from the magnetic rack and resuspend the pellet in 61 µl nuclease-free water. Incubate for 2 minutes at room temperature.")),
+   tags$li(checkboxInput("1q", "Pellet the beads on a magnet until the eluate is clear and colourless, for at least 1 minute.")),
+   tags$li(checkboxInput("1r", "Remove and retain 61 µl of eluate into a clean 1.5 ml Eppendorf DNA LoBind tube.")),
+   tags$li(checkboxInput("1s", "Quantify 1 µl of eluted sample using a Qubit fluorometer."))
+ )
+          )
+)
+
+```
+
+```{r}
+adapter.tab <- tabItem(tabName = "adapter",
+  box(title = "Materials and Consumables", collapsible = TRUE, height = "calc(100vh - 200px)",
+      gt_output(outputId = "supplies_adapter")))
+```
+
+```{r}
+cleanup.tab <- tabItem(tabName = "cleanup",
+  box(title = "Materials and Consumables", collapsible = TRUE, height = "calc(100vh - 200px)",
+      gt_output(outputId = "supplies_cleanup")))
+```
+
+```{r}
+flowcell.tab <- tabItem(tabName = "flowcell",
+  box(title = "Materials and Consumables", collapsible = TRUE, height = "calc(100vh - 200px)",
+      gt_output(outputId = "supplies_flowcell")))
+```
+
+```{r}
+dashboardBody <- dashboardBody(
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "builds/shinydashboard.css")
+  ),
+  tabItems(overview.tab, endprep.tab, adapter.tab, cleanup.tab, flowcell.tab)
+)
+```
+
+```{r}
+dashboardHeader <- dashboardHeader(title = "Protocol for LSK114 Whole Genome Library Prep")
+```
+
+
+```{r}
+ui <- dashboardPage(header  = dashboardHeader,
+                    sidebar = dashboardSidebar,
+                    body    = dashboardBody)
+```
+
+
+```{r, context = "server"}
+server <- function(input, output) {
+  output$supplies_all      <- render_gt(expr = gt_supplies)
+  output$supplies_endprep  <- render_gt(expr = supplies_endprep)
+  output$supplies_adapter  <- render_gt(expr = supplies_adapter)
+  output$supplies_cleanup  <- render_gt(expr = supplies_cleanup)
+  output$supplies_flowcell <- render_gt(expr = supplies_flowcell)
+  output$input_dna         <- render_gt(expr = input_dna)
+  output$kit_contents      <- render_gt(expr = SQK.LSK114.contents)
+  
+  output$LSK114_tubes <- renderImage( { 
+      list(src = "attachments/SQK-LSK114_tubes.svg", height = "90%")}, 
+    deleteFile = FALSE) 
+  
+}
+```
+
+
+```{r}
+shinyApp(ui = ui, server = server)
+```
+

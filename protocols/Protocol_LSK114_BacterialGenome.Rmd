@@ -1,0 +1,100 @@
+---
+title: "Protocol for Library Prep: Bacterial Genome using LSK114 on MinION"
+author: "Alicia M. Rich, Ph.D."
+date: "`r Sys.Date()`"
+output: 
+  flexdashboard::flex_dashboard:
+    vertical_layout: scroll
+runtime: shiny
+params:
+  local: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  laptop: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  desktop: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+  
+---
+
+```{r global, include=F}
+params <- list(
+  local = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  laptop = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  desktop = "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+)
+
+source(paste0(params$local, "dependencies/setup.R"))
+opts_chunk$set(message = FALSE,
+               warning = FALSE,
+               echo    = FALSE,
+               include = TRUE,
+               eval    = TRUE)
+source(paste0(params$local, "protocols/builds/Build_Protocol_SQK_LSK114.R"))
+```
+
+# Overview
+
+## Row
+
+### Equipment, Materials, and Consumables 
+
+```{r}
+card(full_screen = T,
+     card_body(gt_output(outputId = "supplies_all")))
+```
+
+
+```{r, context = "server"}
+output$supplies_all <- render_gt(expr = gt_supplies)
+```
+
+# DNA Repair and End Prep {.tabset .tabset-fade}
+
+## Materials
+
+```{r}
+card(full_screen = T,
+     card_body(gt_output(outputId = "supplies_endprep")))
+```
+
+```{r, context = "server"}
+output$supplies_endprep  <- render_gt(expr = supplies_endprep)
+```
+
+## Procedure
+
+(@) Thaw DNA Control Sample (DCS) at room temperature, spin down, mix by pipetting, and place on ice.
+
+## Notes
+
+# Adapter Ligation {.tabset .tabset-fade}
+
+## Materials
+
+```{r}
+card(full_screen = T,
+     card_body(gt_output(outputId = "supplies_adapter")))
+```
+
+```{r, context = "server"}
+output$supplies_adapter  <- render_gt(expr = supplies_adapter)
+```
+
+
+
+# Library Clean-up
+
+# Prime and Load the Flow Cell {.tabset .tabset-fade}
+
+## Materials
+
+```{r}
+card(full_screen = T,
+     card_body(gt_output(outputId = "supplies_flowcell")))
+```
+
+```{r, context = "server"}
+output$supplies_flowcell  <- render_gt(expr = supplies_flowcell)
+```
+
+
+
+
+      paste0(ymd_hms(now(), tz = Sys.timezone()))

@@ -1,0 +1,178 @@
+---
+title: "Protocol for Library Prep: Bacterial Genome using LSK114 on MinION"
+author: "Alicia M. Rich, Ph.D."
+date: "`r Sys.Date()`"
+output: html_document
+runtime: shiny
+params:
+  local: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  laptop: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  desktop: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+  
+---
+
+```{r global, include=F}
+params <- list(
+  local = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  laptop = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  desktop = "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+)
+
+source(paste0(params$local, "dependencies/setup.R"))
+opts_chunk$set(message = FALSE,
+               warning = FALSE,
+               echo    = FALSE,
+               include = TRUE,
+               eval    = TRUE)
+source(paste0(params$local, "protocols/builds/Build_Protocol_SQK_LSK114.R"))
+```
+
+```{r}
+dashboardPage(
+  dashboardHeader("Protocol for Sequencing Bacterial Genomes Using LSK114"),
+    dashboardSidebar(
+    sidebarMenu(
+      menuItem("Overview"         , tabName = "overview", icon = icon("dashboard")),
+      menuItem("End Prep"         , tabName = "endprep" , icon = icon("th")),
+      menuItem("Adapter Ligation" , tabName = "adapter" , icon = icon("th")),
+      menuItem("Library Cleanup"  , tabName = "cleanup" , icon = icon("th")),
+      menuItem("Load Flow Cell"   , tabName = "flowcell", icon = icon("th"))
+    )
+  ),
+    dashboardBody(
+    tabItems(
+      tabItem(tabName = "overview",
+        fluidRow(
+          box(title = "Equipment, Materials, and Consumables",
+            gt_output(outputId = "supplies_all")),
+          box(title = "SQK-LSK114 Contents",
+            gt_output(outputId = "kit_contents"),
+            imageOutput("LSK114_tubes")),
+          box(
+            title = "Input DNA",
+            gt_output(outputId = "input_dna")
+          )
+        )
+      ),
+      tabItem(tabName = "endprep",
+        fluidRow(
+          box(title = "Materials and Consumables",
+            gt_output(outputId = "supplies_endprep")),
+          box(title = "SQK-LSK114 Contents",
+            gt_output(outputId = "kit_contents"),
+            imageOutput("LSK114_tubes")),
+          box(
+            title = "Input DNA",
+            gt_output(outputId = "input_dna")
+          )
+        )
+      )
+    )
+  )
+)
+```
+
+
+
+
+```{r}
+ui <- page_fluid( 
+  navset_tab(
+      nav_panel("Background", 
+            accordion(  
+                accordion_panel( 
+                  title = "Equipment, Materials, and Consumables", 
+                  icon = bsicons::bs_icon("menu-app"),
+                  card(
+                  full_screen = T,
+                  card_body(
+                            gt_output(outputId = "supplies_all")))),
+                accordion_panel( 
+                  title = "SQK-LSK114 Kit Contents", 
+                  icon = bsicons::bs_icon("menu-app"),
+                  layout_columns(
+                  card(gt_output(outputId = "kit_contents")),
+                  card(imageOutput("LSK114_tubes")), 
+                  col_widths = c(4, 8))
+                  ),
+                accordion_panel( 
+                  title = "Input DNA Amount", 
+                  icon = bsicons::bs_icon("menu-app"),
+                  gt_output(outputId = "input_dna")))),
+      nav_panel("DNA Repair and End Prep",
+            actionButton("starting_endprep", "Record Start of DNA Repair and End Prep Stage"),
+            accordion( 
+                accordion_panel( 
+                  title = "Materials and Consumables", 
+                  icon = bsicons::bs_icon("menu-app"),
+                  gt_output(outputId = "supplies_endprep")),
+                accordion_panel( 
+                  title = "Step 1", 
+                  icon = bsicons::bs_icon("menu-app"),
+                  checkboxInput("checkbox", "Checkbox", FALSE))),
+                  textAreaInput("endprep_notes", "Enter comment for notebook"),
+                  actionButton("finished_endprep", "DNA Repair and End Prep Complete"),
+                  value_box(title = "DNA Repair and End Prep Start and Finish Stamps:",
+                            value = textOutput("endprep_stamp"),
+                            shiny::p("Notes:"),
+                            shiny::p(textOutput("endprep_notes")))),
+      nav_panel("Adapter Ligation", 
+            accordion( 
+                accordion_panel( 
+                  title = "Materials and Consumables", 
+                  icon = bsicons::bs_icon("menu-app"),
+                  gt_output(outputId = "supplies_adapter")))), 
+      nav_panel("Library Clean-Up", 
+            accordion( 
+                accordion_panel( 
+                  title = "Materials and Consumables", 
+                  icon = bsicons::bs_icon("menu-app"),
+                  gt_output(outputId = "supplies_cleanup")))), 
+      nav_panel("Priming and Loading the Flow Cell", 
+            accordion( 
+                accordion_panel( 
+                  title = "Materials and Consumables", 
+                  icon = bsicons::bs_icon("menu-app"),
+                  gt_output(outputId = "supplies_flowcell")))), 
+      id = "page")
+)
+```
+
+```{r, context = "server"}
+server <- function(input, output) {
+  output$supplies_all      <- render_gt(expr = gt_supplies)
+  output$supplies_endprep  <- render_gt(expr = supplies_endprep)
+  output$supplies_adapter  <- render_gt(expr = supplies_adapter)
+  output$supplies_cleanup  <- render_gt(expr = supplies_cleanup)
+  output$supplies_flowcell <- render_gt(expr = supplies_flowcell)
+  output$input_dna         <- render_gt(expr = input_dna)
+  output$kit_contents      <- render_gt(expr = SQK.LSK114.contents)
+  
+  output$LSK114_tubes <- renderImage( { 
+      list(src = "attachments/SQK-LSK114_tubes.svg", height = "90%")}, 
+    deleteFile = FALSE) 
+  
+  endprep_start <- reactive({
+      ymd_hms(now(), tz = Sys.timezone())
+  }) %>%
+  bindEvent(input$starting_endprep)
+  
+  output$endprep_stamp <- renderText({
+    paste(paste0("Start: ", endprep_start()),
+    paste0("End: ", ymd_hms(now(), tz = Sys.timezone())), sep = md("/n"))
+  }) %>%
+    bindEvent(input$finished_endprep)
+  
+  output$endprep_notes <- renderText({
+    input$endprep_notes
+  }) %>%
+    bindEvent(input$finished_endprep)
+}
+```
+
+
+```{r}
+shinyApp(ui = ui, server = server)
+```
+
+
