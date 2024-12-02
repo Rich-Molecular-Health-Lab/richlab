@@ -1,0 +1,278 @@
+---
+title: "LSK Library Prep for Whole Genome"
+author: "Alicia M. Rich, Ph.D."
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme:
+      bootswatch: yeti
+    css: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/dependencies/_bootswatch.scss"
+runtime: shiny
+params:
+  local: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  laptop: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  desktop: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+  
+---
+
+```{r global, include=F}
+params <- list(
+  local = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  laptop = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  desktop = "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+)
+
+source(paste0(params$local, "dependencies/setup.R"))
+opts_chunk$set(message = FALSE,
+               warning = FALSE,
+               echo    = FALSE,
+               include = TRUE,
+               eval    = TRUE)
+source(paste0(params$local, "protocols/builds/Build_Protocol_SQK_LSK114.R"))
+
+bs_global_theme(bootswatch = "yeti")
+```
+
+```{r}
+lab.members <- list(
+    "Azadmanesh, Shayda"      = "Shayda Azadmanesh (SA)", 
+    "Gill, Dedric"            = "Dedric Gill (DG)", 
+    "Miller, Joel"            = "Joel Miller (JM)",
+    "Raad, Thomas"            = "Thomas Raad (TR)",
+    "Rich, Alicia"            = "Alicia Rich (AMR)",
+    "Segura-Palacio, Trineca" = "Trineca Segura-Palacio (TSP)",
+    "Stout, Anthony"          = "Anthony Stout (AS)",
+    "Wagstaff, Cate"          = "Cate Wagstaff (CW)",
+    "Other"                   = "Other",
+    "NA"                      = "NA")
+
+lab.samplesets <- list(
+  "Omaha Zoo Pygmy Lorises",
+  "UNO Marmosets",
+  "North American Bats (direct)",
+  "North American Bats (environmental)",
+  "Cultured Microbes",
+  "Omaha Zoo Diets",
+  "North American Bat Diets (wild)",
+  "Other"
+)
+```
+
+
+```{r}
+opener <- page_fluid(
+  card(
+  card_header("Notebook Setup"),
+  tags$h2("Before you begin:"), tags$br(),
+  tags$h4("Set up your parameters to export notebook entry for this experiment..."), tags$br(),
+  dateInput("exp_date", "Start Date", value = Sys.Date(), format = "yyyy-mm-dd"),
+  selectInput("author", "Your Name", lab.members),
+  selectizeInput("assist", "Others Assisting", lab.members, multiple = T, selected = "NA"),
+  selectizeInput("sample_set", "Focal Sample Set", lab.samplesets, multiple = T),
+  numericInput("n_rxns", "N Samples/Reactions (including control tubes)", value = 1, min = 1, max = 96),
+  uiOutput("sample_info"),
+  textAreaInput("start_note", "Notes/Comments"),
+  actionButton("submit_start_note", label = "Enter note"),
+  textOutput("start_note_submitted")   
+  )
+)
+
+closer <- page_fluid(
+  card(
+  card_header("Notebook Entry Conclusion"),
+  tags$h2("Before you finish:"), tags$br(),
+  tags$h4("Conclude your notebook entry and export report..."), tags$br(),
+  dateInput("exp_date", "End Date", value = Sys.Date(), format = "yyyy-mm-dd"),
+  textAreaInput("end_note", "Notes/Comments"),
+  textOutput("end_note_render"),
+  actionButton("generate_report", label = "Generate Report"),
+  textOutput("report_preview"),
+  downloadButton("download_report", "Download Report")
+  )
+)
+```
+
+
+```{r}
+make_steps <- function(nested_steps) {
+  imap(nested_steps, ~ {
+    step_name    <- .y
+    step_content <- .x
+    main_step    <- step_content[[1]]
+    substeps     <- step_content[-1]  
+    substep_list <- if (length(substeps) > 0) {
+      tags$ol(
+        lapply(names(substeps), function(substep_name) {tags$li(substeps[[substep_name]])}),
+        style = "list-style-type: lower-alpha;")
+    } else {NULL}
+
+    card(id = paste0("step_", step_name), class = "bg-primary",
+         card_header(textOutput(outputId = paste0("stamp_", step_name))),
+    layout_sidebar(fillable = TRUE,
+        sidebar = sidebar(
+          open = FALSE,
+          textAreaInput(inputId = paste0("text_", step_name) , label = "Add note"),
+          actionButton(inputId = paste0("submit_", step_name), label = "Enter note"),
+          textOutput(outputId = paste0("note_", step_name))),   
+        layout_columns(
+          col_widths = c(1, 2, 9),
+          checkboxInput(inputId = paste0("check_", step_name), label = ""),
+        tags$h5(step_name),
+        tagList(
+          tags$h5(main_step),
+          substep_list
+        )),
+        layout_columns(col_widths = c(12),
+          uiOutput(outputId = paste0("card_", step_name))
+        )
+      )
+    )
+  })
+}
+```
+
+```{r}
+start.tab
+
+main.tabs <- tabsetPanel(
+  id = "main.tabs",
+  type = "hidden",
+  tab_panel("overview",
+            overview.tab),
+  tab_panel("endprep",
+            endprep.tab),
+  tab_panel("adapter",
+            adapter.tab),
+  tab_panel("cleanup",
+            cleanup.tab)
+)
+
+conclusion.tab
+```
+
+
+
+```{r}
+overview.tab <- page_fillable(navset_card_tab( 
+    nav_panel("Equipment and Materials", gt_output(outputId = "supplies_all")), 
+    nav_panel( "Input DNA", gt_output(outputId = "input_dna")), 
+    nav_panel("SQK-LSK114 Contents", layout_columns(col_widths = c(4, 8), full_screen = T,
+              card(gt_output(outputId = "kit_contents")), card(imageOutput("LSK114_tubes"))))))
+
+endprep.tab <- page_fillable(navset_card_tab( 
+    nav_panel("Materials", gt_output(outputId = "supplies_endprep")), 
+    endprep.recs, 
+    nav_panel("Procedure", make_steps(endprep))))
+
+adapter.tab <- page_fillable(navset_card_tab( 
+    nav_panel("Materials", gt_output(outputId = "supplies_adapter")), 
+    adapter.recs,
+    nav_panel("Procedure", make_steps(adapter))))
+
+cleanup.tab  <- page_fillable(make_steps(cleanup))
+flowcell.tab <- page_fillable(make_steps(flowcell))
+```
+
+
+```{r}
+ui <- page_fillable(
+  useShinyjs(),
+  navset_tab(
+    nav_panel("Overview"                       ,  overview.tab), 
+    nav_panel("I. DNA Repair and End Prep"     ,  endprep.tab), 
+    nav_panel("II. Adapter Ligation"           ,  adapter.tab),
+    nav_panel("III. Library Clean-up"          ,  cleanup.tab), 
+    nav_panel("IV. Prime and Load Flow Cell"   ,  flowcell.tab), 
+    id = "lsk114_protocol"), 
+    theme = bs_theme(bootswatch = "yeti"))
+```
+
+
+```{r, context = "server"}
+server <- function(input, output) {
+  
+  step_names <- c(paste0("I.",   1:19, "."), 
+                  paste0("II.",  1:7,  "."), 
+                  paste0("III.", 1:12, "."), 
+                  paste0("IV.",  1:13, "."))
+ 
+  walk(step_names, ~ {
+    id <- .x  
+    observeEvent(input[[paste0("check_", id)]], {
+      toggleCssClass(
+        id = paste0("step_", id),
+        class = "bg-secondary",
+        condition = input[[paste0("check_", id)]])
+      
+      output[[paste0("stamp_", id)]] <- renderText({
+        if (input[[paste0("check_", id)]]) {
+          paste(format(Sys.time(), "%Y-%m-%d %H:%M:%S"))
+        } else {
+          ""  
+        }})})})
+  
+  walk(step_names, ~ {
+    id <- .x  
+    observeEvent(input[[paste0("submit_", id)]], {
+      output[[paste0("note_", id)]] <- renderText({
+        if (input[[paste0("submit_", id)]]) {
+          paste(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), input[[paste0("text_", id)]])
+        } else {
+          ""
+        }})})})
+  
+  output$card_I.5.    <- renderUI({page_fluid(card(gt_output("rxn_endprep")))})
+  output$card_I.19.   <- renderUI({page_fluid(card(class = "bg-dark", card_header("End of Step"), 
+    layout_columns(col_widths = c(2, 10), bs_icon("pause-circle-fill", size = "3em"),
+"Take forward the repaired and end-prepped DNA into the adapter ligation step. However, at this point it is also possible to store the sample at 4°C overnight.")))})
+  output$card_II.5.   <- renderUI({page_fluid(card(gt_output("rxn_adapter")))})
+  output$card_III.12. <- renderUI({page_fluid(card(gt_output("input_dna")))})
+  output$card_IV.2.   <- renderUI({page_fluid(card(gt_output("rxn_flowcell")))})
+  output$card_IV.3.   <- renderUI({page_fluid(accordion(open = FALSE, 
+    accordion_panel(title = "Illustration", card(layout_columns(col_widths = 1/2, imageOutput("imgIV3a"), imageOutput("imgIV3b"))))))})
+  output$card_IV.4. <- renderUI({page_fluid(accordion(open = FALSE, accordion_panel(title = "Illustration", card(imageOutput("imgIV4")))))})
+  output$card_IV.5. <- renderUI({page_fluid(accordion(open = FALSE, accordion_panel(title = "Illustration", card(imageOutput("imgIV5")))))})
+  output$card_IV.6. <- renderUI({page_fluid(accordion(open = FALSE, accordion_panel(title = "Illustration", card(imageOutput("imgIV6")))))})
+  output$card_IV.8. <- renderUI({page_fluid(card(gt_output("rxn_sequence")))})
+  output$card_IV.9. <- renderUI({page_fluid(accordion(open = FALSE, 
+    accordion_panel(title = "Illustration", card(layout_columns(col_widths = 1/2, imageOutput("imgIV9a"), imageOutput("imgIV9b"))))))})
+  output$card_IV.11. <- renderUI({page_fluid(accordion(open = FALSE, accordion_panel(title = "Illustration", card(imageOutput("imgIV11")))))})
+  output$card_IV.12. <- renderUI({page_fluid(accordion(open = FALSE, 
+    accordion_panel(title = "Illustration", card(layout_columns(col_widths = 1/2, imageOutput("imgIV12a"), imageOutput("imgIV12b"))))))})
+  output$card_IV.13. <- renderUI({page_fluid(accordion(open = FALSE, 
+    accordion_panel(title = "Illustration", card(imageOutput("imgIV13")))), card(class = "bg-dark", card_header("End of Step"), 
+    layout_columns(col_widths = c(2, 10), bs_icon("pause-circle-fill", size = "3em"),
+"The prepared library is used for loading into the flow cell. Store the library on ice or at 4°C until ready to load.")))})
+    
+  output$LSK114_tubes <- renderImage({list(src = "attachments/SQK-LSK114_tubes.svg", height = "90%")}, deleteFile = FALSE) 
+  output$imgIV3a      <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_1a.svg"    , height = "90%")}, deleteFile = FALSE)
+  output$imgIV3b      <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_1b.svg"    , height = "75%")}, deleteFile = FALSE)
+  output$imgIV4       <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_2.svg"     , height = "75%")}, deleteFile = FALSE)
+  output$imgIV5       <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_03_V5.gif" , height = "75%")}, deleteFile = FALSE)
+  output$imgIV6       <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_04_V5.gif" , height = "75%")}, deleteFile = FALSE)
+  output$imgIV9a      <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_06_V5.gif" , height = "75%")}, deleteFile = FALSE)
+  output$imgIV11      <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_07_V5.gif" , height = "75%")}, deleteFile = FALSE)
+  output$imgIV12a     <- renderImage({list(src="attachments/Step_8_update.png"                         , height = "75%")}, deleteFile = FALSE)
+  output$imgIV12b     <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_9.svg"     , height = "75%")}, deleteFile = FALSE)
+  output$imgIV13      <- renderImage({list(src="attachments/J2264_-_Light_shield_animation_Flow_Cell_FAW_optimised.gif", height = "75%")}, deleteFile = FALSE)
+  output$supplies_all      <- render_gt(gt_supplies)
+  output$kit_contents      <- render_gt(SQK.LSK114.contents)
+  output$supplies_endprep  <- render_gt(supplies_endprep)
+  output$supplies_adapter  <- render_gt(supplies_adapter)
+  output$supplies_cleanup  <- render_gt(supplies_cleanup)
+  output$supplies_flowcell <- render_gt(supplies_flowcell)
+  output$input_dna         <- render_gt(input_dna)
+  output$flowcell_check    <- render_gt(flowcell_check)
+  output$rxn_endprep       <- render_gt(rxn_endprep)
+  output$rxn_adapter       <- render_gt(rxn_adapter)
+  output$rxn_flowcell      <- render_gt(rxn_flowcell)
+  output$rxn_sequence      <- render_gt(rxn_sequence)
+  
+
+}
+```
+
+```{r}
+shinyApp(ui = ui, server = server)
+```
+

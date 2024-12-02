@@ -1,0 +1,17 @@
+---
+title: "Lab Notebook Entry"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    df_print: paged
+    self_contained: true
+    keep_md: true
+    theme:
+      bootswatch: yeti
+params:
+  author: NA
+  project: NA
+  protocol: NA
+---

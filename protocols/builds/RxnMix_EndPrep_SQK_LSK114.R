@@ -17,3 +17,18 @@ rxn_endprep <- tibble(
   tab_source_note("Between each addition, pipette mix 10-20 times.") %>%
   tab_source_note("Then thoroughly mix the reaction by gently pipetting and briefly spinning down.") %>%
   opt_stylize(style = 1, color = "cyan")
+
+endprep_vol_per_rxn <- list(
+  "Diluted DNA Extract"               = 47,
+  "DNA CS (optional)"                 = 1,
+  "NEBNext FFPE DNA Repair Buffer v2" = 7,
+  "NEBNext FFPE DNA Repair Mix "      = 2,
+  "Ultra II End-prep Enzyme Mix"      = 3)
+
+endprep_reagents <- list(
+  "Diluted DNA Extract",
+  "DNA CS (optional)",
+  "NEBNext FFPE DNA Repair Buffer v2",
+  "NEBNext FFPE DNA Repair Mix ",
+  "Ultra II End-prep Enzyme Mix")
+

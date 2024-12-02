@@ -1,0 +1,113 @@
+---
+title: "LSK Library Prep for Whole Genome"
+author: "Alicia M. Rich, Ph.D."
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme:
+      bootswatch: yeti
+params:
+  local: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  laptop: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  desktop: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+  
+---
+
+```{r global, include=F}
+params <- list(
+  local = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  laptop = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  desktop = "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+)
+
+source(paste0(params$local, "dependencies/setup.R"))
+opts_chunk$set(message = FALSE,
+               warning = FALSE,
+               echo    = FALSE,
+               include = TRUE,
+               eval    = TRUE)
+
+```
+
+```{r}
+extracts.loris    <- read.recent.version.csv("data", "extracts_loris_")    %>% filter(str_starts(SampleID, "HDZ")) %>%
+  mutate(ExtractConc       = str_remove_all(ExtractConcentration, ">"), .keep = "unused") %>%
+  mutate(ExtractConc       = if_else(ExtractConc == "LOW", 0, round(as.numeric(ExtractConc), 0)),
+         ExtractDate       = mdy(ExtractDate), .keep = "unused")
+
+dna.extracts <- extracts.loris %>% filter(ExtractType == "DNA") %>%
+  select(-ExtractType) %>%
+  rename_with( ~ str_c(.x, "_DNA")) %>%
+  rename(SampleID = SampleID_DNA)
+
+rna.extracts <- extracts.loris %>% filter(ExtractType == "RNA") %>%
+  select(-ExtractType) %>%
+  rename_with( ~ str_c(.x, "_RNA")) %>%
+  rename(SampleID = SampleID_RNA)
+
+compilation.loris <- read.recent.version.csv("data", "compilation_loris_") %>% 
+  filter(str_starts(SampleID, "HDZ") & str_starts(SequenceID, "HDZ")) %>% 
+  select(SequenceID:Pooled.Library.Code, 
+         SampleID)
+```
+
+
+```{r}
+samples.loris     <- read.recent.version.csv("data", "samples_loris_")     %>% 
+                      filter(str_starts(SampleID, "HDZ")) %>% 
+                      select(-SampleBox)  %>%
+                      mutate(extracted_dna     = if_else(SampleID %in%    dna.extracts$SampleID,      "yes", "no"),
+                             extracted_rna     = if_else(SampleID %in%    rna.extracts$SampleID,      "yes", "no"),
+                             seq_16s           = if_else(SampleID %in%    compilation.loris$SampleID, "yes", "no")) %>%
+                      full_join(compilation.loris) %>%
+                      mutate(Subj_Certainty    = if_else(SampleSubject == "Warble" | SampleSubject == "Culi", "yes", "no")) %>%
+                      mutate(CollectionDate    = mdy(SampleDate),
+                             Subject           = str_remove_all(str_squish(str_trim(SampleSubject)), "\\?"),
+                             Seq_16sDate       = ymd(str_remove_all(Run.ID, "MIN_16_")),
+                             LibraryFinalConc  = round(as.numeric(Final.Library.Concentration), 0),
+                             LibraryPoolVol_ul = round(as.numeric(Volume.Added.to.Pool..uL.), 0),
+                             LibraryTube       = as.integer(LibraryTube),
+                             LibraryCode       = Pooled.Library.Code,
+                             .keep = "unused") %>%
+  full_join(dna.extracts) %>%
+  full_join(rna.extracts) %>%
+  distinct() %>%
+  group_by(SampleID) %>%
+  mutate(n_dna_extractions = n_distinct(ExtractID_DNA),
+         n_rna_extractions = n_distinct(ExtractID_RNA),
+         n_seq_16s     = n_distinct(SequenceID)) %>%
+  mutate(n_dna_extractions = if_else(extracted_dna == "no", 0, n_dna_extractions),
+         n_rna_extractions = if_else(extracted_rna == "no", 0, n_rna_extractions),
+         n_seq_16s     = if_else(seq_16s   == "no", 0, n_seq_16s), .keep = "unused") %>%
+  ungroup() %>%
+  select(SampleID,
+         CollectionDate,
+         Subject, 
+         Subj_Certainty, 
+         SampleCollectedBy,
+         SampleNotes,
+         n_dna_extractions, 
+         n_rna_extractions, 
+         n_seq_16s,
+         ends_with("_RNA"),
+         ends_with("_DNA"),
+         SequenceID,
+         Seq_16sDate,
+         Pipeline,
+         LibraryTube,
+         LibraryBarcode,
+         LibraryFinalConc,
+         LibraryPoolVol_ul,
+         LibraryCode)
+```
+
+
+```{r}
+
+write.table(samples.loris,
+              paste0(params$local, "data/samples_loris_clean_2024-11-20.tsv"),
+              sep       = "\t",
+              quote     = FALSE,
+              row.names = FALSE)
+```
+
