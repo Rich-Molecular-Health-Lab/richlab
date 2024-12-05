@@ -1,0 +1,15 @@
+
+git init
+git clone https://github.com/username/username.github.io
+
+git remote add origin https://github.com/Rich-Molecular-Health-Lab/richlab.git
+
+git pull origin main --rebase
+
+git branch -M main
+
+git add .
+
+git commit -m "first commit"
+
+git push origin main

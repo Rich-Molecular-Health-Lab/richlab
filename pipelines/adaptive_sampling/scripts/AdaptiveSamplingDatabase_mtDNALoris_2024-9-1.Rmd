@@ -1,0 +1,432 @@
+---
+title: "Build an Adaptive Sampling Database for mtDNA Sequencing on the MinION"
+author: "Alicia Rich"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: "lumen"
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    toc_float: true
+    code_folding: "show"
+params:
+  date: !r Sys.Date()
+  work_dir: "/work/richlab/aliciarich/loris_mtdna"
+  ref_dir: "/work/richlab/aliciarich/loris_mtdna/references"
+  local: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/pipelines/adaptive_sampling/"
+  desktop: ""
+  laptop: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/pipelines/adaptive_sampling/"
+  
+  
+---
+
+<style>
+.swan-chunk {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #f9f9f9;
+  font-family: monospace;
+  white-space: pre;
+}
+</style>
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+source(paste0(params$local, "dependencies/setup.R"))
+```
+
+# File Attachments
+
+You should be able to create all the files you need by following the directions here, but for reference, I am attaching some example input files that I downloaded from NCBI by following the initial steps.  
+
+```{r}
+download_file(
+  path = paste0(params$local, "data/Nycticebus-Xanthonycticebus_GenBank_mtDNA.xml"),
+  output_name = "Nycticebus-Xanthonycticebus_GenBank_mtDNA",
+  button_label = "Download Pygmy Loris GenBank Records",
+  button_type = "danger",
+  has_icon = TRUE,
+  icon = "fa fa-save",
+  self_contained = TRUE
+)
+```
+
+
+```{r}
+download_file(
+  path = paste0(params$local, "data/lorisiformes_mtDNA_genome_organelle_report.jsonl"),
+  output_name = "lorisiformes_mtDNA_genome_organelle_report",
+  button_label = "Download Lorisid Organelle Report",
+  button_type = "danger",
+  has_icon = TRUE,
+  icon = "fa fa-save",
+  self_contained = TRUE
+)
+
+download_file(
+  path = paste0(params$local, "data/Nycticebus-Xanthonycticebus_GenBank_mtDNA.fasta"),
+  output_name = "Nycticebus-Xanthonycticebus_GenBank_mtDNA",
+  button_label = "Download Pygmy Loris FASTA Sequences",
+  button_type = "danger",
+  has_icon = TRUE,
+  icon = "fa fa-save",
+  self_contained = TRUE
+)
+
+download_file(
+  path = paste0(params$local, "data/lorisiformes_mtDNA_genome.fasta"),
+  output_name = "lorisiformes_mtDNA_genome",
+  button_label = "Download Lorisid FASTA Sequences",
+  button_type = "danger",
+  has_icon = TRUE,
+  icon = "fa fa-save",
+  self_contained = TRUE
+)
+
+```
+  
+I will also attach the R scripts that I used to load packages and functions for this R Markdown script, as some of the code here includes custom functions I wrote for this script. To load those custom functions and use them, simple run the following code from your R terminal:
+  
+```
+source("pathtoscript.R")
+```
+
+```{r}
+download_this(
+  path = "your_report.Rmd", # Path to your Rmd file
+  output_name = "Your_Report_Source", # The name for the downloaded file
+  button_label = "Download Source Rmd", # Button label
+  button_type = "primary", # Bootstrap button style
+  has_icon = TRUE, # Optional icon
+  icon = "fa fa-file-code" # Font Awesome icon for code
+)
+```
+
+
+```{r}
+download_file(
+  path = paste0(params$local, "dependencies/functions.R"),
+  output_name = "functions.R",
+  button_label = "Download Script with Custom Functions",
+  button_type = "danger",
+  has_icon = TRUE,
+  icon = "fa fa-save",
+  self_contained = TRUE
+)
+
+download_file(
+  path = paste0(params$local, "dependencies/setup.R"),
+  output_name = "setup.R",
+  button_label = "Download Script to Load all Necessary Packages",
+  button_type = "danger",
+  has_icon = TRUE,
+  icon = "fa fa-save",
+  self_contained = TRUE
+)
+
+
+```
+
+
+
+# Intro
+
+This workflow is designed to build an adaptive sampling reference database to target the full mitochondrial genome for pygmy lorises. Eventually we plan to modify this to also target specific nuclear regions.  
+  
+-   Once we build and index this database, we will transfer it to our local working directory of the MinION sequencer.  
+-   Then we will use the enrichment approach of adaptive sampling while sequencing 50 fmol of template from a libary we created using ONT's Ligation Sequencing Kit.  
+  
+We extracted DNA for those libaries using the Zymo Quick DNA Fecal/Soil Microbe Kits on fresh loris fecal samples stored in DNA/RNA-Shield Stabilizer at ambient temperature for ~2 weeks, followed by -20 C for up to 6 months.  
+
+## Adaptive sampling inputs
+
+After considering factors like % of the genome to enrich for, read lengths and response time, the next step is to collate the input files needed for an adaptive sampling experiment. 
+  
+These are:  
+
+-   A genomic reference: this must be a FASTA or a pre-calculated minimap2 index  
+-   Optionally, a .bed file with the genomic coordinates of the target regions  
+  -   *Note that if you do not input a .bed file, then the entire FASTA/minimap2 index file will be used for enrichment or depletion.*  
+  -   *We will not be needing a BED file when enriching for whole mtGenome assembly, as in this case. If we want to target genomic loci in the future, then we will be able to gather bed files by entering sequence view on the NCBI nucleotide database and then selecting Download tracks to generate a bed file for our coordinates of interest*  
+  
+*Note: ONT recommends saving your alignment files in a folder with the prefix /data or the default location MinKNOW saves your reads after a sequencing run, to avoid issues when performing adaptive sampling in MinKNOW:*  
+  
+e.g.:  
+
+-   **Windows:** C:\data\  
+-   **Mac:** /Library/MinKNOW/data/  
+-   **Ubuntu:** /var/lib/MinKNOW/data/  
+  
+# Selecting Reference Sequences
+  
+Our experiment is complicated by a lack of available representation for the full taxonomic diversity of the recently declared genus *Xanthonycticebus* (NCBI taxid3030685). We also cannot be certain whether any *Nycticebus* (NCBI txid9469) or other individuals from the Lorisidae family (NCBI txid9461) are represented in the demographic history of the Provisional Pygmy Slow Loris Species Survival Plan.  
+      
+To account for this, we will gather as many published nucleotide sequences from the mitochondrial genomes of all members of *Nycticebus* and *Xanthonycticebus* as possible. We will also include any fullly annotated mitochondrial reference genomes available for members of the Lorisiformes Infraorder (NCBI taxid376917)  
+    
+## Gathering Data on NCBI
+
+The NCBI Databases can be tricky to navigate due to the abundance of available information and the many different options for access. We are going to use direct downloading and searching from the browser for this.  When downloading more sequences or accessing more databases, it is best to use the remote FTP access through bash scripts which utilize NCBI's Entrez Direct module (see our 16S workflow for those scripts).  
+    
+  
+### Whole Mitochondrial Reference Genomes for Lorisiformes
+  
+  #. First, visit the [NCBI Databases master page by following this link.](https://www.ncbi.nlm.nih.gov/datasets/)   
+  
+  #. Type **Lorisiformes** into the search box, and you will automatically be taken [here.](https://www.ncbi.nlm.nih.gov/datasets/taxonomy/376917/)  
+  
+  #. Click **Browse Organelles** and then use the **Filters** drop-down menu to limit the list to **Mitochondrion**.  
+  
+  #. Select all rows using the checkboxes and click the drop-down menu under **Download**. Select **Download Package**.  
+  
+  #. You can uncheck the option to download protein sequences, and you should also use a clear and consistent naming convention for your database.  
+  
+  #. This will download a zipped directory to your local downloads location. 
+  
+  #. Unzip and transfer the files located in the subdirectory *data* to your working directory for the rest of this script.  
+  
+      -   *Note: I recommend that you also immediately rename those files using the same basename you selected for the zipped directory.*  
+        
+
+### All Mitochondrial Genomic Sequences available on GenBank for *Xanthonycticebus* and *Nycticebus*
+
+  #.  Visit [NCBI's Nucleotide Database](https://www.ncbi.nlm.nih.gov/nucleotide/) and enter the following query in the search box:  
+  ```  
+  ((txid3030685[Organism:exp] OR txid9469[Organism:exp]) AND mitochondrion[filter]) NOT refseq[filter]  
+  ```  
+
+  -   This first searches the database for any organisms matching the genus *Xanthonycticebus* (txid3030685) or *Nycticebus* (txid9469). Then it filters those results so only mitochondrial sequences remain. It applies another filter to exclude the full mitochondrial reference genomes that we have already downloaded in the previous steps. (*I also include a step below to ensure this avoided duplication of those genomes.*)  
+    
+  2.  Now locate the drop-down menu for **Send to** in the upper righthand side of the page.   
+  
+    -   Select **Complete Record** and **File**, and then under **Format** choose **FASTA**.  
+    -   After the FASTA file downloads, repeat the step above, except this time, under **Format**, choose **INDSeq XML**.
+    -   Make sure your base filename for both of these downloads match one another but are distinct from the basename of the RefSeq Genome downloads. Then transfer both to your working directory and proceed below.  
+  
+
+# Concatenate and Clean Reference Files
+
+## Load Complete Information for Records
+
+### GenBank Records in XML Table
+
+```{r}
+genbank.summary <- read_xml(paste0(params$local, "data/Nycticebus-Xanthonycticebus_GenBank_mtDNA.xml"))
+
+locus       <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_locus"))
+length      <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_length"))
+moltype     <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_moltype"))
+topology    <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_topology"))
+division    <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_division"))
+update.date <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_update-date"))
+create.date <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_create-date"))
+definition  <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_definition"))
+prim.acc    <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_primary-accession"))
+acc.ver     <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_accession-version"))
+other.id    <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_other-seqids"))
+source      <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_source"))
+organism    <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_organism"))
+taxonomy    <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_taxonomy"))
+references  <- xml_text(xml_find_all(genbank.summary, ".//INSDSeq_references"))
+
+genbank.summary.df <- tibble(
+                     acc.ver     = acc.ver     ,
+                     length      = length      ,
+                     division    = division    ,
+                     create.date = create.date ,
+                     definition  = definition  ,
+                     source      = source      ,
+                     organism    = organism    ,
+                     taxonomy    = taxonomy     ) %>%
+              arrange(taxonomy) %>%
+              separate_wider_delim(taxonomy, "; ", too_few = "align_start", names = c("Domain",
+                                                                                      "Kingdom",
+                                                                                      "Phylum",
+                                                                                      "Subphylum1",
+                                                                                      "Subphylum2",
+                                                                                      "Infraphylum",
+                                                                                      "Class",
+                                                                                      "Subclass",
+                                                                                      "Infraclass",
+                                                                                      "Order",
+                                                                                      "Suborder",
+                                                                                      "Infraorder",
+                                                                                      "Family",
+                                                                                      "Genus")) %>%
+              mutate(Species    = str_remove(organism, "^\\w+\\s(?=\\w+)"),
+                     length     = as.numeric(length),
+                     date       = as_date(dmy(create.date))) %>%
+              mutate(Species    = if_else(str_detect(Species, "MB-2023"), "intermedius", Species),
+                     Subspecies = if_else(str_detect(Species, "^\\w+\\s\\w+"), str_remove(Species, "^\\w+\\s(?=\\w+)"), "")) %>%
+              mutate(Species    = if_else(Subspecies == "", Species, str_extract(Species, "^\\w+(?=\\s\\w+)")),
+                     organism   = if_else(str_detect(organism, "i MB-2023"), "Xanthonytcticebus intermedius", organism))
+
+organisms <- genbank.summary.df %>% distinct(organism)
+knit_print(asis_output(paste0("- `", organisms$organism, "`", sep = "\n")))
+```
+  
+*Above: List of the Taxa from our XML that are represented by our compilation of mitochondrial DNA GenBank Records:*
+
+
+### RefSeq Records in JSON Table
+
+```{r warning=F}
+refgeno.summary <- stream_in(file(paste0(params$local, "data/lorisiformes_mtDNA_genome_organelle_report.jsonl"))) %>%
+              mutate(Species       =  str_remove(organism$organismName, "^\\w+\\s(?=\\w+)"),
+                     Genus         = str_extract(organism$organismName, "^\\w+\\s(?=\\w+)"),
+                     organism      = organism$organismName,
+                     accession_gb  = genbank$accession,
+                     accession_rs  = refseq$accession,
+                     length        = as.numeric(length),
+                     geneCount     = as.numeric(geneCount),
+                     date          = as_date(ymd(genbank$submissionDate)), .keep = "unused") %>%
+              mutate(Species    = if_else(str_detect(Species, "MB-2023"), "intermedius", Species),
+                     Subspecies = if_else(str_detect(Species, "^\\w+\\s\\w+"), str_remove(Species, "^\\w+\\s(?=\\w+)"), "")) %>%
+              mutate(Species    = if_else(Subspecies == "", Species, str_extract(Species, "^\\w+(?=\\s\\w+)")),
+                     organism   = if_else(str_detect(organism, "i MB-2023"), "Xanthonytcticebus intermedius", organism)) %>%
+              select(
+                     accession_gb ,
+                     accession_rs ,
+                     Genus,
+                     Species,
+                     Subspecies,
+                     organism,
+                     length,
+                     description,
+                     geneCount,
+                     date
+                     )
+organisms <- refgeno.summary %>% distinct(organism)
+knit_print(asis_output(paste0("- `", organisms$organism, "`", sep = "\n")))
+```
+  
+*Above: List of the Taxa from our JSON for which we will now have a complete mitochondrial Reference Genome:*
+
+## Load FASTA Sequence Records for Each Source
+
+```{r}
+genbank.nycti.xanth <- read.fasta(paste0(params$local, "data/Nycticebus-Xanthonycticebus_GenBank_mtDNA.fasta"))
+refgenome.lorisifor <- read.fasta(paste0(params$local, "data/lorisiformes_mtDNA_genome.fasta"))
+```
+
+```{r}
+names.genbank  <- tibble(getName(genbank.nycti.xanth)) %>% 
+  mutate(file      ="GenBank_mtDNA", 
+         accession = getName(genbank.nycti.xanth) ) %>% 
+  select(accession, file)
+
+names.refgeno  <- tibble(getName(refgenome.lorisifor)) %>% 
+  mutate(file      ="mtDNA_genome", 
+         accession = getName(refgenome.lorisifor) ) %>% 
+  select(accession, file)
+
+all.refgenome.accessions <- names.refgeno %>% select(accession)
+all.genbank.accessions   <- names.genbank %>% select(accession)
+```
+
+
+## Check for Duplication of Records
+
+```{r}
+duplicated.references.1 <- dplyr::intersect(all.refgenome.accessions, all.genbank.accessions)
+duplicated.references.2 <- duplicated.references.1 %>% 
+                           left_join(refgeno.summary, by = join_by(accession == accession_gb)) %>%
+                           mutate(accession = accession_rs) %>%
+                           select(accession)
+
+duplicated.references  <- bind_rows(duplicated.references.1, duplicated.references.2)
+
+knit_print(asis_output(paste0("- `", duplicated.references$accession, "`", sep = "\n")))
+```
+  
+*Above: List of Accessions to Filter out of the GenBank FASTA because of Duplication across Files*
+
+
+## Remove Duplicated Sequences from GenBank Records
+
+```{r}
+names.duplicated <- c(duplicated.references$accession)
+
+genbank.nycti.xanth.filtered <- genbank.nycti.xanth[!names(genbank.nycti.xanth) %in% names.duplicated]
+```
+
+## Concatenate all Remaining Records into Single FASTA File
+
+```{r}
+mtDNA.loris.references <- c(genbank.nycti.xanth.filtered, refgenome.lorisifor)
+
+cleaned_names <- gsub("\\.1$", "", names(mtDNA.loris.references))
+
+write.fasta(sequences =       mtDNA.loris.references, 
+            names     = names(cleaned_names), 
+            file.out  = paste0(params$local, "data/mtDNA_loris_references_", params$date,".fasta"))
+```
+
+# Tidy and Export Table with Complete Information by Accession/Sequence Name to Analyze Matches Later
+
+This will be important contextual information for understanding our alignments later on and working out the demographic history of our subjects based on their matches to different representative sequences on the NCBI databases. 
+
+-   *Note that some prefer to update the sequence names to make them more informative, but I find it seems to keep this tidier if I retain the original unique Accession Numbers as the sequence names and keep a data table like this that I match and manipulate in R after performing alignments and other analysis remotely.*  
+
+```{r}
+mtDNA.loris.refs.master  <- tibble(getName(mtDNA.loris.references)) %>% 
+  mutate(accession = getName(mtDNA.loris.references) ) %>% select(accession) %>%
+  left_join(genbank.summary.df, by = join_by(accession == acc.ver)) %>%
+  left_join(refgeno.summary, by = join_by(accession == accession_gb)) %>%
+  mutate(length      = if_else(is.na(length.x),     length.y,       length.x),
+         organism    = if_else(is.na(organism.x),   organism.y,     organism.x),
+         Genus       = if_else(is.na(Genus.x),      Genus.y,        Genus.x),
+         Species     = if_else(is.na(Species.x),    Species.y,      Species.x),
+         Subspecies  = if_else(is.na(Subspecies.x), Subspecies.y,   Subspecies.x),
+         date        = if_else(is.na(date.x),       date.y,         date.x),
+         definition  = if_else(is.na(definition),   description,    definition),
+         source      = if_else(is.na(source),       description,    source),
+         .keep = "unused") %>%
+  select(Accession  = accession,
+         Definition = definition,
+         Source     = source,
+         Genus,
+         Species,
+         Subspecies,
+         Organism   = organism,
+         Date       = date,
+         Length     = length) %>%
+  mutate(seq_name    = str_remove_all(Accession, ".\\d$")) %>%
+  relocate(seq_name, .before = Accession)
+
+write.table(mtDNA.loris.refs.master, paste0(params$local, "data/mtdna_loris_references_master", params$date, ".tsv"), sep = "\t", quote = F, row.names = F)
+
+kbl(mtDNA.loris.refs.master, caption = "Complete reference database to be used for Pygmy Loris mtDNA adaptive sampling") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T) %>%
+  column_spec(1, bold = T) %>%
+  column_spec(4:7, italic = T) %>%
+  scroll_box(width = "100%", height = "500px", fixed_thead = T)
+```
+
+
+# Index for Minimap2
+
+**Minimap2 is currently one of the preferred alignment algorithms for noisy long-read sequence alignments from nanopore pipelines.**  
+   
+This code will take our reference sequences and generate a matching .mmi index file that minimap2 uses for aligning reads to the references later on. The MINKNOW software incorporates the minimap2 algorithm, and so it will also use the same index file during adaptive sampling. Running this code now has the added benefit of verifying our reference database has been properly cleaned and organized. If it has not, the indexing should fail. If it works, this indexing step only takes a few seconds.  
+
+## Open Job & Load Package 
+
+```{r, echo=F}
+open.job("index", "150", "1", "1")
+
+load.pkg("minimap2")
+```
+
+## Set Path and Run Code
+
+```{swan}
+refs="${params$ref_dir}/mtDNA_loris_references_${params$date}.fasta"
+
+minimap2 -d "${params$ref_dir}/mtDNA_loris_references_${params$date}.mmi" "$refs"
+```
+
+# Next Steps  
+
+Transfer the .fasta and the .mmi file with the same basename into the local MINKNOW *data* directory. Once you start an adaptive sampling run, you will be able to direct MINKNOW to use these two files as the references so that only templates that are able to align to a reference somewhere in this database will be sequenced. If a read cannot be matched to any reference sequence, the MinION will shut down that pore and move onto another template until it finds a match to proceed.  
+

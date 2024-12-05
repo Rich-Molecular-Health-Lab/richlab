@@ -86,7 +86,7 @@ endprep.tab <- nav_panel("I. DNA Repair and End Prep", value = "endprep",
           make_steps(endprep),
         card(
           card_header("Enter QC Results Below:"),
-          uiOutput("endprepQC")),
+          uiOutput("qcresult1")),
         card_footer(actionButton("endprep_done", "Next: Adapter Ligation"))))
 
 adapter.tab <- nav_panel("II. Adapter Ligation", value = "adapter",
@@ -440,14 +440,11 @@ output$endprep_tubes <- renderReactable({
   height              = "auto")
 })
 
-  samples_list <- reactive({
-    req(working_extracts())
-    as.list(working_extracts()$ExtractID_DNA)
-  })
-  
-
-
-   iwalk(samples_list(), ~ {
+output$qcresult1 <- renderUI({
+  card(
+  card_header("Enter QC Results Below:"),
+  layout_column_wrap(
+  iwalk(as.list(working_extracts()$ExtractID_DNA), ~ {
     tube   <- .y
     sample <- .x
     
@@ -458,8 +455,9 @@ output$endprep_tubes <- renderReactable({
             value   = NULL,
             min     = 0,
             max     = 200)
-    })})
-
+    
+    })})))
+})
 }
 ```
 

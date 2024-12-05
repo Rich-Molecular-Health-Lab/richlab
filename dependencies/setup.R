@@ -40,6 +40,7 @@ library(tidyr)
 library(usethis)
 library(utf8)
 source(paste0(params$local, "dependencies/functions.R"))
+library(rmdformats)
 
 library(lpSolve)
 library(shinyMatrix)

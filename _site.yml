@@ -9,6 +9,8 @@ navbar:
       href: people.html
     - text: "Projects"
       href: projects.html
+    - text: "Methods"
+      href: methods.html
     - text: "For Lab Members"
       href: members.html
     - text: "For Dr. Rich's Classes"
