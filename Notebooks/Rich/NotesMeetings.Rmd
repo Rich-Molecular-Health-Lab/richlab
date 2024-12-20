@@ -1,0 +1,25 @@
+---
+title: "NotesMeetings"
+output: html_document
+---
+
+# SALCI
+
+## Project Background
+
+- Opportunistic culturing and they continued to produce gas after months
+
+## Locations
+- Border Lake
+- Kokjohn
+
+## Enrichments
+- LiCl
+- Li-acetate
+
+## Salts
+- Chloride
+- Carbonate
+- Acetate
+
+Only show putative functions in a proposal if you are also going to include plans to evaluate that.

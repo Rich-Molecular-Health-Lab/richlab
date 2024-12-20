@@ -78,6 +78,10 @@ flowcell <- list(
        b = "Gently lower the light shield onto the flow cell. The light shield should sit around the SpotON cover, covering the entire top section of the flow cell.")) %>%
   set_names(paste0("IV.", seq_along(.), "."))
 
+steps <- c(adapter, cleanup, endprep, flowcell)
+
+step_names <- names(steps)
+
 endprep.recs <- accordion_panel("Recommendations", 
                           card(class = "bg-info",
                                card_header("ONT's QC Recommendation"),

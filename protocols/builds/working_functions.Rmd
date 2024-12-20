@@ -1,0 +1,466 @@
+
+```{r}
+walk(step_names, ~ {
+  id <- .x  
+  observeEvent(input[[paste0("check_", id)]], {
+    toggleCssClass(
+      id = paste0("step_", id),
+      class = "bg-secondary",
+      condition = input[[paste0("check_", id)]])
+    
+    output[[paste0("stamp_", id)]] <- renderText({
+      if (input[[paste0("check_", id)]]) {
+        paste(format(Sys.time(), "%Y-%m-%d %H:%M:%S"))
+      } else {
+        ""  
+      }})})})
+
+walk(step_names, ~ {
+  id <- .x  
+  observeEvent(input[[paste0("submit_", id)]], {
+    output[[paste0("note_", id)]] <- renderText({
+      if (input[[paste0("submit_", id)]]) {
+        paste(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), input[[paste0("text_", id)]])
+      } else {
+        ""
+      }})})})
+```
+
+
+```{r}
+tab.link <- function(tab1, tab2) {
+observeEvent(input[[paste0(tab1, "_done")]], {nav_select("main.nav", paste0(tab2))})
+}
+```
+
+```{r}
+tab.link("setup"   , "endprep")
+tab.link("endprep" , "adapter")
+tab.link("adapter" , "cleanup")
+tab.link("cleanup" , "flowcell")
+tab.link("flowcell", "closer")
+```
+
+```{r}
+output$LSK114_tubes <- renderImage({list(src = "attachments/SQK-LSK114_tubes.svg", height = "90%")}, deleteFile = FALSE) 
+output$imgIV3a      <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_1a.svg"    , height = "90%")}, deleteFile = FALSE)
+output$imgIV3b      <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_1b.svg"    , height = "75%")}, deleteFile = FALSE)
+output$imgIV4       <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_2.svg"     , height = "75%")}, deleteFile = FALSE)
+output$imgIV5       <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_03_V5.gif" , height = "75%")}, deleteFile = FALSE)
+output$imgIV6       <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_04_V5.gif" , height = "75%")}, deleteFile = FALSE)
+output$imgIV9a      <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_06_V5.gif" , height = "75%")}, deleteFile = FALSE)
+output$imgIV11      <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_07_V5.gif" , height = "75%")}, deleteFile = FALSE)
+output$imgIV12a     <- renderImage({list(src="attachments/Step_8_update.png"                         , height = "75%")}, deleteFile = FALSE)
+output$imgIV12b     <- renderImage({list(src="attachments/Flow_Cell_Loading_Diagrams_Step_9.svg"     , height = "75%")}, deleteFile = FALSE)
+output$imgIV13      <- renderImage({list(src="attachments/J2264_-_Light_shield_animation_Flow_Cell_FAW_optimised.gif", height = "75%")}, deleteFile = FALSE)
+```
+
+```{r}
+output$supplies_all      <- render_gt(gt_supplies)
+output$kit_contents      <- render_gt(SQK.LSK114.contents)
+output$supplies_endprep  <- render_gt(supplies_endprep)
+output$supplies_adapter  <- render_gt(supplies_adapter)
+output$supplies_cleanup  <- render_gt(supplies_cleanup)
+output$supplies_flowcell <- render_gt(supplies_flowcell)
+output$input_dna         <- render_gt(input_dna)
+output$flowcell_check    <- render_gt(flowcell_check)
+output$rxn_endprep       <- render_gt(rxn_endprep)
+output$rxn_adapter       <- render_gt(rxn_adapter)
+output$rxn_flowcell      <- render_gt(rxn_flowcell)
+output$rxn_sequence      <- render_gt(rxn_sequence)
+```
+
+```{r}
+custom.card <- function(type, name) {
+renderUI({page_fluid(card(paste0(type, "Output")(name)))})
+}
+```
+
+```{r}
+illustration.card <- function(img) {
+  renderUI({page_fluid(accordion(open = FALSE, accordion_panel(title = "Illustration", card(imageOutput(img)))))})
+}
+
+illustration2.card <- function(img1, img2) {
+  renderUI({page_fluid(accordion(open = FALSE, accordion_panel(title = "Illustration", 
+                                                          card(layout_columns(col_widths = 1/2, 
+                                                                imageOutput(img1), 
+                                                                imageOutput(img2))))))})
+}
+```
+
+```{r}
+output$card_I.3.    <- custom.card("reactable", "extracts_endprep")
+output$card_I.5.    <- renderUI({page_fluid(card(reactableOutput("endprep_react"), uiOutput("checklist_tubes")))})
+output$card_I.19.   <- renderUI(card(card_header("Enter QC Results:"), uiOutput("qc1_result")))
+output$card_II.5.   <- custom.card("gt_"      , "rxn_adapter")
+output$card_III.11. <- renderUI(card(card_header("Enter QC Results:"), uiOutput("qc2_result")))
+output$card_III.12. <- custom.card("reactable", "final_libraries")
+output$card_IV.2.   <- renderUI({page_fluid(card(gt_output("rxn_flowcell"), uiOutput("checklist_tubes")))})
+output$card_IV.3.   <- illustration2.card("imgIV3a", "imgIV3b")
+output$card_IV.4.   <- illustration.card( "imgIV4")
+output$card_IV.5.   <- illustration.card( "imgIV5")
+output$card_IV.6.   <- illustration.card( "imgIV6")
+output$card_IV.8.   <- illustration.card( "imgIV8")
+output$card_IV.9.   <- illustration2.card("imgIV9a", "imgIV9b")
+output$card_IV.11.  <- illustration.card( "imgIV11")
+output$card_IV.12.  <- illustration2.card("imgIV12a", "imgIV12b")
+```
+
+```{r}
+format_select      <- reactableTheme(rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #ffa62d"))
+format_checklist   <- reactableTheme(rowSelectedStyle = list(backgroundColor = "darkgray"      , color = "#eee"),
+                                     rowStyle         = list(backgroundColor = "darkgoldenrod1", borderColor = "black"))
+
+seq_subtable <- function(index) {
+  seq_data <- samples.loris %>%
+    filter(ExtractID_DNA == samples.loris$ExtractID_DNA[index]) %>%
+    select(SequenceID,
+           Seq_16sDate,
+           LibraryBarcode,
+           LibraryFinalConc,
+           LibraryCode,
+           LibraryPoolVol_ul) %>%
+    filter(!is.na(SequenceID))
+  
+  div(style = "padding: 1rem",
+      if (nrow(seq_data) > 0) {
+        reactable(seq_data, 
+                  outlined = TRUE, 
+                  columns = list(
+                    SequenceID        = colDef(name = "16S Library"        , maxWidth = 125, align = "left"),
+                    Seq_16sDate       = colDef(name = "Date Sequenced"     , maxWidth = 100, align = "left", format = colFormat(date = TRUE)),
+                    LibraryBarcode    = colDef(name = "Barcode"            , maxWidth = 100, align = "left"),
+                    LibraryFinalConc  = colDef(name = "Final Concentration", maxWidth = 125, align = "left", format = colFormat(suffix = ngul)),
+                    LibraryCode       = colDef(name = "Pooled Library ID"  , maxWidth = 100, align = "left"),
+                    LibraryPoolVol_ul = colDef(name = "Pooled Library Vol" , maxWidth = 100, align = "left", format = colFormat(suffix = ul))))
+      } else {
+        div("Not sequenced yet.")
+      })
+}
+```
+
+
+```{r}
+output$samples <- renderReactable({
+  reactable(samples.loris, 
+            groupBy             = c("SampleID"),
+            details             = seq_subtable,
+            columns             = columns,
+            columnGroups        = column_groups,
+            theme               = format_select,
+            selection           = "multiple", 
+            defaultExpanded     = TRUE,
+            onClick             = "select",
+            filterable          = TRUE, 
+            paginationType      = "simple", 
+            showPageSizeOptions = TRUE, 
+            highlight           = TRUE, 
+            compact             = TRUE, 
+            showSortable        = TRUE, 
+            defaultPageSize     = 20,
+            height              = "auto")
+})
+```
+
+```{r}
+data <- reactiveValues(libraries = NULL)
+
+selected_rows <- reactive({
+    getReactableState("samples", "selected")
+  })
+
+n_rxns <- reactive({
+    req(selected_rows())
+    length(selected_rows())
+  })
+
+rxns <- reactiveValues(endprep = NULL)
+
+observe({
+  req(n_rxns())
+  validate(need(n_rxns() > 0, "Number of reactions must be greater than zero."))
+  req(endprep.tbl)
+  rxns$endprep <- endprep.tbl %>%
+    mutate(Volume_total = Volume_rxn * n_rxns())
+})
+
+output$endprep_react <- renderReactable({
+  req(rxns$endprep)
+  if (nrow(rxns$endprep) == 0) {
+    return(reactable(data.frame(Message = "No reagents to display.")))
+  }
+  reactable(rxns$endprep,
+            columns = list(
+              Reagent      = colDef(name = "Reagent"),
+              Volume_rxn   = colDef(name = "Volume per Rxn", format = colFormat(suffix = ul,   digits = 1)),  
+              Volume_total = colDef(name = "Total Volume"  , format = colFormat(suffix = ul,   digits = 1)),  
+              .selection   = colDef(name =  "Check when added", sticky = "left")
+            ),
+            paginationType      = "simple", 
+            selection           = "multiple",
+            onClick             = "select",
+            theme               = format_checklist,
+            highlight           = TRUE, 
+            compact             = TRUE, 
+            defaultPageSize     = 10,
+            height              = "auto")
+})
+
+observe({
+  if (is.null(selected_rows()) || length(selected_rows()) == 0) {
+    data$libraries <- NULL
+  }
+})
+
+observe({
+  selected <- getReactableState("samples", "selected")
+  req(selected)
+  req(samples.loris)  
+  req(nrow(samples.loris) >= max(selected))  
+  
+  data$libraries <- samples.loris[selected, ] %>%
+    mutate(TubeNo = row_number()) %>%
+    select(
+      TubeNo,
+      ExtractID   = ExtractID_DNA,
+      ExtractConc = ExtractConc_DNA,
+      SampleID    = SampleID)
+})
+
+output$checklist_tubes <- renderUI({
+  req(data$libraries$TubeNo)
+  card(
+    card_header("Check as you add to each"),
+    checkboxGroupInput(
+      inputId = "add_rxnmix",
+      label   = "Reaction Mix Added",
+      choices = c(data$libraries$TubeNo),
+      inline  = TRUE,
+      width   = "100%"),
+    checkboxGroupInput(
+      inputId = "add_template",
+      label   = "Template Added",
+      choices = c(data$libraries$TubeNo),
+      inline  = TRUE,
+      width   = "100%")
+  )
+})
+
+
+new.value <- function(data, column, input_id) {
+  observeEvent(input[[input_id]], {
+    req(data$data)
+    value <- input[[input_id]]
+    if (is.null(value) || value == "") {
+      showNotification(paste(column, "input is invalid"), type = "error")
+      return()
+    }
+    data$data <- data$data %>%
+      mutate(!!rlang::sym(column) := value)
+  })
+}
+```
+
+
+```{r}
+new.value(data, "LibPrepBy"     , "author")
+new.value(data, "LibPrepDate"   , "exp_date")
+new.value(data, "FlowCellType"  , "flowcell_type")
+new.value(data, "FlowCellSerial", "flowcell_num")
+new.value(data, "SeqDevice"     , "minion")
+
+observeEvent(input$strands, {
+  req(data$libraries)
+  data$libraries <- data$libraries %>%
+    mutate(Strands = as.numeric(input$strands))
+})
+
+strands <- reactive({
+    req(input$strands)
+    as.numeric(input$strands)
+  })
+
+est_length            <- reactive({
+  req(input$fragments)
+  case_when(input$fragments == "1" ~ 10000,
+            input$fragments == "2" ~ 900,
+            input$fragments == "3" ~ 2000,
+            input$fragments == "4" ~ 7000,
+            input$fragments == "5" ~ 10000)})
+
+output$adjust_length <- renderUI({
+  req(est_length())
+  sliderInput("fragment_length", "Adjust Length (bp) if needed", min = 100, max =  20000, value = est_length())
+})
+
+new.value(data, "Length", "fragment_length")
+
+InputMassStartSuggest <- reactive({
+  req(input$fragments, input$fragment_length, strands())
+  case_when(
+    input$fragments == "1" ~ 1000,
+    input$fragments == "2" ~ (200 * (input$fragment_length * (307.97*strands())) + (18.02*strands()) * 10^-6),
+    input$fragments == "3" ~ (150 * (input$fragment_length * (307.97*strands())) + (18.02*strands()) * 10^-6),
+    input$fragments == "4" ~ (100 * (input$fragment_length * (307.97*strands())) + (18.02*strands()) * 10^-6),
+    input$fragments == "5" ~ 1000)})
+
+output$adjust_input <- renderUI({ 
+  req(InputMassStartSuggest())
+  numericInput("input_confirmed", "Adjust input mass (ng) here (optional)", value = InputMassStartSuggest(), min = 1, max = 2000)
+})
+
+observeEvent(input$fragment_length, {
+  req(data$libraries, input$fragments, input$input_confirmed)
+  data$libraries <- data$libraries %>%
+    mutate(
+      InputMassStart = input$input_confirmed,
+      InputMassFinal = case_when(
+        input$fragments == "1" ~ 300,
+        input$fragments == "2" ~ (50 * ((Length * (307.97*Strands)) + (18.02*Strands)) * 10^-6),
+        input$fragments == "3" ~ (45 * ((Length * (307.97*Strands)) + (18.02*Strands)) * 10^-6),
+        input$fragments == "4" ~ (35 * ((Length * (307.97*Strands)) + (18.02*Strands)) * 10^-6),
+        input$fragments == "5" ~ 300
+      )) %>%
+    mutate(ExtractInputVol = if_else(
+        (InputMassStart/ExtractConc) >= 47, 47, InputMassStart/ExtractConc)) %>%
+    mutate(ExtractDiluteWater = 47 - ExtractInputVol)
+})
+
+output$extracts_endprep <- renderReactable({
+  req(data$libraries, data$libraries$ExtractDiluteWater)
+  reactable(data$libraries,
+            columns = 
+                  list(
+                  TubeNo             = colDef(name = "Tube Number")                                                           ,  
+                  ExtractID          = colDef(name = "Extract ID")                                                            ,  
+                  ExtractConc        = colDef(name = "Extract Concentration"  , format = colFormat(suffix = ngul, digits = 1)),  
+                  ExtractInputVol    = colDef(name = "Extract to Add"         , format = colFormat(suffix = ul,   digits = 1)),  
+                  ExtractDiluteWater = colDef(name = "Water to Add"           , format = colFormat(suffix = ul,   digits = 1)),  
+                  SampleID           = colDef(show = FALSE)                                                                   ,
+                  LibPrepBy          = colDef(show = FALSE)                                                                   ,
+                  LibPrepDate        = colDef(show = FALSE)                                                                   ,
+                  FlowCellType       = colDef(show = FALSE)                                                                   ,
+                  FlowCellSerial     = colDef(show = FALSE)                                                                   ,
+                  SeqDevice          = colDef(show = FALSE)                                                                   ,
+                  Length             = colDef(show = FALSE)                                                                   ,
+                  InputMassStart     = colDef(show = FALSE)                                                                   ,
+                  InputMassFinal     = colDef(show = FALSE)                                                                   ,
+                  .selection         = colDef(name = "Check when added", sticky = "left")                                     ),
+            paginationType      = "simple", 
+            selection           = "multiple",
+            onClick             = "select",
+            theme               = format_checklist,
+            highlight           = TRUE, 
+            compact             = TRUE, 
+            defaultPageSize     = 10,
+            height              = "auto")
+})
+
+
+  output$qc1_result <- renderUI({
+    req(data$libraries)
+    map2(data$libraries$TubeNo, data$libraries$ExtractConc, ~{
+      numericInput(
+        inputId = paste0("qc1_", .x),
+        label   = paste("Tube", .x, "in ng/ul"),
+        value   = .y,
+        min     = 0
+      )})
+    })
+  
+observe({
+  req(data$libraries)
+  qc1_values <- map_dbl(data$libraries$TubeNo, ~{
+    input[[paste0("qc1_", .x)]] %||% NA_real_  
+  })
+
+  data$libraries <- data$libraries %>%
+    mutate(Conc_QC1 = qc1_values)
+})
+
+  output$qc2_result <- renderUI({
+    req(data$libraries, data$libraries$Conc_QC1)
+    map2(data$libraries$TubeNo, data$libraries$Conc_QC1, ~{
+      numericInput(
+        inputId = paste0("qc2_", .x),
+        label   = paste("Tube", .x, "in ng/ul"),
+        value   = .y,
+        min     = 0
+      )})
+    })
+
+observe({
+  req(data$libraries, data$libraries$Conc_QC1, data$libraries$InputMassFinal)
+  qc2_values <- map_dbl(data$libraries$TubeNo, ~{
+    input[[paste0("qc2_", .x)]] %||% NA_real_  
+  })
+
+  data$libraries <- data$libraries %>%
+    mutate(Conc_QC2 = qc2_values) %>%
+    mutate(AdjustLibrary  = case_when(
+      InputMassFinal/Conc_QC2 == 12 ~ "None",
+      InputMassFinal/Conc_QC2  > 12 ~ "Enrich",
+      InputMassFinal/Conc_QC2  < 12 ~ "Dilute")) %>%
+    mutate(LibraryLoadingVol  = if_else(
+      InputMassFinal/Conc_QC2 >= 12, 12,
+      InputMassFinal/Conc_QC2)) %>%
+    mutate(LibraryWaterVol = if_else(AdjustLibrary == "Dilute", (12 - LibraryLoadingVol), 0))
+})
+
+output$final_libraries <- renderReactable({
+  req(data$libraries, data$libraries$LibraryWaterVol)
+  reactable(data$libraries,
+            columns = 
+                  list(
+                  TubeNo             = colDef(name = "Tube Number")                                                           ,  
+                  ExtractID          = colDef(name = "Extract ID")                                                            ,  
+                  ExtractConc        = colDef(show = FALSE)                                                                   ,  
+                  ExtractInputVol    = colDef(show = FALSE)                                                                   ,  
+                  ExtractDiluteWater = colDef(show = FALSE)                                                                   ,  
+                  SampleID           = colDef(show = FALSE)                                                                   ,
+                  LibPrepBy          = colDef(show = FALSE)                                                                   ,
+                  LibPrepDate        = colDef(show = FALSE)                                                                   ,
+                  FlowCellType       = colDef(show = FALSE)                                                                   ,
+                  FlowCellSerial     = colDef(show = FALSE)                                                                   ,
+                  SeqDevice          = colDef(show = FALSE)                                                                   ,
+                  Length             = colDef(show = FALSE)                                                                   ,
+                  InputMassStart     = colDef(show = FALSE)                                                                   ,
+                  InputMassFinal     = colDef(show = FALSE)                                                                   ,
+                  Conc_QC1           = colDef(show = FALSE)                                                                   ,
+                  Conc_QC2           = colDef(name = "Final Concentration"    , format = colFormat(suffix = ngul, digits = 1)),
+                  AdjustLibrary      = colDef(name = "Adjust Library Concentration?")                                         ,
+                  LibraryLoadingVol  = colDef(name = "Library Vol to Add"     , format = colFormat(suffix = ul,   digits = 1)),
+                  LibraryWaterVol    = colDef(name = "Water to Add"           , format = colFormat(suffix = ul,   digits = 1)),
+                  .selection         = colDef(name = "Check when added", sticky = "left")                                     ),
+            paginationType      = "simple", 
+            selection           = "multiple",
+            onClick             = "select",
+            theme               = format_checklist,
+            highlight           = TRUE, 
+            compact             = TRUE, 
+            defaultPageSize     = 10,
+            height              = "auto")
+})
+
+```
+
+
+```{r}
+output$download_libraries <- downloadHandler(
+  filename = function() { "libraries.csv" },
+  content = function(file) {
+    req(data$libraries)
+    write.csv(data$libraries, file, row.names = FALSE)
+  }
+)
+```
+
+
+
+
+
+
+
+
+

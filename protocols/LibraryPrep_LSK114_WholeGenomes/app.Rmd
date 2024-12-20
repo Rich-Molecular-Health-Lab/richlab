@@ -1,0 +1,152 @@
+---
+title: "LSK Library Prep for Whole Genome"
+author: "Alicia M. Rich, Ph.D."
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme:
+      bootswatch: yeti
+runtime: shiny
+params:
+  base_path: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/protocols/LibraryPrep_LSK114_WholeGenomes/"
+  local: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  laptop: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  desktop: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+  
+---
+
+# Set Global Parameters
+
+```{r}
+params <- list(
+  local     = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  base_path = paste0(params$local, "protocols/LibraryPrep_LSK114_WholeGenomes/"))
+
+opts_chunk$set(message = FALSE,
+               warning = FALSE,
+               echo    = FALSE,
+               include = TRUE,
+               eval    = TRUE)
+```
+
+
+# Source Scripts
+
+```{r}
+source(paste0(params$base_path, "global.R"))
+source(paste0(params$base_path, "ui/ui_tabs.R"))
+source(paste0(params$base_path, "ui/steps/step_definitions.R"))
+source(paste0(params$base_path, "ui/steps/endprep_steps.R"))
+source(paste0(params$base_path, "ui/steps/adapter_steps.R"))
+source(paste0(params$base_path, "ui/steps/cleanup_steps.R"))
+source(paste0(params$base_path, "ui/steps/flowcell_steps.R"))
+```
+
+# UI
+
+```{r}
+ui <- page_fillable(
+  useShinyjs(),
+  navset_tab(
+    id = "main.nav", 
+    setup_tab(), 
+    nav_menu(
+      "Protocol Steps",
+      endprep_tab(),
+      adapter_tab(),
+      cleanup_tab(),
+      flowcell_tab()),
+    conclude_tab()
+))
+```
+
+# Server
+
+
+```{r}
+# Source dependencies
+source_safe <- function(file) {
+  if (file.exists(file)) {
+    source(file)
+  } else {
+    stop(paste("File not found:", file))
+  }
+}
+
+files_to_source <- c(
+  "resources/assets_loader.R",
+  "server/helper_functions.R",
+  "resources/data_loader.R",
+  "resources/data_gt.R",
+  "server/make_steps.R",
+  "server/observers.R",
+  "server/reactable_outputs.R",
+  "server/render_gt_outputs.R",
+  "server/render_images.R",
+  "server/ui_cards.R",
+  "server/ui_logic.R"
+)
+walk(files_to_source, ~ source_safe(paste0(params$base_path, .x)))
+
+# Define the server
+server <- function(input, output, session) {
+  
+  # Session Theme  
+  session$setCurrentTheme(bs_theme(bootswatch = "lumen"))
+  
+  # Reactive Values  
+  data <- reactiveValues(libraries = NULL)
+  rxns <- reactiveValues(endprep = NULL)
+  n_rxns <- reactiveVal()
+  
+  # Tab Linking
+  tabs <- c("setup", "endprep", "adapter", "cleanup", "flowcell", "closer")
+  walk(seq_along(tabs) - 1, ~ tab.link(tabs[.x], tabs[.x + 1], input))
+  
+  # Render Dynamic UI Components
+  render_dynamic_cards(output)
+  samples_count_ui(input, output)
+  adjust_length_ui(output, est_length)
+  adjust_input_ui(output, InputMassStartSuggest)
+  checklist_tubes_ui(output, data)
+  
+  # QC Result Rendering
+  qc_columns <- list("ExtractConc" = "qc1", "Conc_QC1" = "qc2")
+  render_qc_results(output, data, qc_columns)
+  
+  # Observers
+  observe_steps(input, output, session, step_names)
+  observe_samples_submit(input, data, rxns, n_rxns, endprep_tbl)
+  observe_confirm_length(input, data)
+  observe_qc(input, data, qc_columns)
+  
+  # Reactable Outputs
+  reactable_configs <- list(
+    list(outputId = "samples"         , data = samples.loris , columns = columns_samples, details = seq_subtable),
+    list(outputId = "filtered_samples", data = data$libraries, columns = columns_samples_filtered),
+    list(outputId = "setup_list"      , data = data$libraries, columns = columns_setup),
+    list(outputId = "extracts_ready"  , data = data$libraries, columns = columns_extracts_ready),
+    list(outputId = "extract_prep"    , data = data$libraries, columns = columns_extract_prep),
+    list(outputId = "endprep_react"   , data = rxns$endprep  , columns = columns_endprep_react),
+    list(outputId = "final_libraries" , data = data$libraries, columns = columns_final_libraries)
+  )
+  walk(reactable_configs, ~ render_reactable(output, .x$outputId, .x$data, .x$columns, .x$details))
+  
+  # Image Outputs
+  render_images(output)
+  
+  # gt Outputs
+  gt_functions <- list(
+    render_supplies_all, render_supplies_endprep, render_kit_contents,
+    render_supplies_adapter, render_supplies_cleanup, render_supplies_flowcell,
+    render_input_dna, render_flowcell_check, render_rxn_endprep,
+    render_rxn_adapter, render_rxn_flowcell, render_rxn_sequence
+  )
+  walk(gt_functions, ~ .x(output))
+}
+```
+
+# Run the Shiny app
+```{r}
+shinyApp(ui = ui, server = server, options = "test.mode")
+```

@@ -1,0 +1,195 @@
+---
+title: "Research Funding Options"
+author: "Alicia M. Rich, Ph.D."
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme:
+      bootswatch: sandstone
+params:
+  local: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+  laptop: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  desktop: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+  
+---
+
+```{r include=FALSE}
+source(paste0(params$local, "dependencies/setup.R"))
+```
+
+
+
+```{r}
+nih.calls <- tribble(
+  ~name,
+  ~document,
+  ~division,
+  ~program,
+  ~link,
+  ~summary,
+  "Virtual Consortium for Translational/Transdisciplinary Environmental Research (ViCTER)",
+  "RFA-ES-21-007",
+  "National Institute of Environmental Health Sciences (NIEHS)",
+  "Superfund Research Program (SRP); Translational Science",
+  "https://www.niehs.nih.gov/research/supported/translational/victer",
+  "Each consortium sets research goals in an area where environmental factors are known or expected to influence the development or progression of disease. The consortia are virtual in that some or all participants collaborate through conference calls, webinars, and annual meetings. The synergy from these teams may stimulate fresh perspectives or approaches to studying an environmental health topic. (This is one of two calls that SRP funds R01s through)."
+  
+)
+
+
+
+nsf.calls <- tribble(
+  ~name,
+  ~document,
+  ~division,
+  ~link,
+  ~summary,
+  "Innovative Use of Scientific Collections (IUSC)",
+  "24-069",
+  "BIO/DEB or BIO/DBI",
+  "https://new.nsf.gov/funding/opportunities/dcl-innovative-use-scientific-collections-iusc",
+  "Encourages proposals that foster innovative and diverse uses of collections and/or associated digital data for novel research, education and training applications within and across STEM.",
+  
+  "Partnership to Advance Conservation Science and Practice (PACSP)",
+  "24-531",
+  "awaiting renewed publication",
+  "https://new.nsf.gov/funding/opportunities/pacsp-partnership-advance-conservation-science-practice",
+  "Supports partnerships that conduct research on organismal biology, ecology and evolution to develop and implement action plans and technologies that advance biodiversity conservation. We seek proposals that involve the implementation of conservation activities based on conservation science principles via academic-conservation organization partnerships.",
+  
+  "Leveraging Innovations From Evolution (LIFE)",
+  "24-049",
+  "Integrative Research in Biology (IntBIO) track, either BIO/DEB, BIO/IOS, or BIO/MCB.",
+  "https://new.nsf.gov/funding/opportunities/dcl-leveraging-innovations-evolution-life",
+  "Encourages research proposals using comparative approaches to identify evolutionary convergent adaptations to life’s challenges and the mechanisms that underlie them. NSF BIO seeks to speed discoveries of nature-based solutions that will benefit science and society.",
+  
+  "Poorly Sampled and Unknown Taxa (PurSUiT)",
+  "20-059",
+  "Division of Environmental Biology (BIO/DEB)",
+  "https://new.nsf.gov/funding/opportunities/dcl-poorly-sampled-unknown-taxa-pursuit",
+  "Encourages proposals to fill significant gaps in biodiversity knowledge and integrate taxon information within an evolutionary or taxonomic framework in poorly known, or dark areas, of the tree of life."
+) %>% mutate(deadline = "see program", type = "Special calls")
+
+nsf.programs <- tribble(
+  ~name,
+  ~document,
+  ~division,
+  ~deadline,
+  ~link,
+  ~summary,
+  "Capacity: Biological Collections",
+  "23-580",
+  "Biological Infrastructure (BIO/DBI)",
+  "rolling",
+  "https://new.nsf.gov/funding/opportunities/capacity-biological-collections",
+  "Supports improvements to and digitization of biological collections and collection-based information to advance biology and increase the broader applicability of collections.",
+  
+  "Division of Integrative Organismal Systems Core Programs (IOS)",
+  "24-546",
+  "Integrative Organismal Systems (BIO/IOS)",
+  "rolling",
+  "https://new.nsf.gov/funding/opportunities/ios-division-integrative-organismal-systems-core-programs",
+  "Supports research and training on the structure and function of organisms. Core areas supported include development, behavior, neuroscience, physiology, biomechanics and morphology, microbiology, virology and immunology, and plant and animal genomics.",
+  
+  "Division of Environmental Biology (DEB)",
+  "24-543",
+  "Environmental Biology (BIO/DEB)",
+  "rolling",
+  "https://new.nsf.gov/funding/opportunities/deb-division-environmental-biology",
+  "Supports research and training on evolutionary and ecological processes acting at the level of populations, species, communities, ecosystems, macrosystems and biogeographic extents.",
+  
+  "Division of Molecular and Cellular Biosciences Core Programs (MCB)",
+  "24-539",
+  "Molecular and Cellular Biosciences (BIO/MCB)",
+  "rolling",
+  "https://new.nsf.gov/funding/opportunities/mcb-division-molecular-cellular-biosciences-core-programs",
+  "Supports research on living systems at the molecular, subcellular and cellular levels. Core areas supported include cellular dynamics and function; genetic mechanisms; molecular biophysics; and systems and synthetic biology.",
+  
+  "Building Research Capacity of New Faculty in Biology (BRC-BIO)",
+  "22-500",
+  "Directorate for Biological Sciences (BIO)",
+  "July 1, annually",
+  "https://new.nsf.gov/funding/opportunities/brc-bio-building-research-capacity-new-faculty-biology",
+  "Supports pre-tenure faculty in the biological sciences at institutions that traditionally do not receive significant NSF funding in this field, including minority-serving institutions, predominantly undergraduate institutions and R2 institutions.",
+  
+  "Faculty Early Career Development Program (CAREER)",
+  "22-586",
+  "Any (most likely Directorate for Biological Sciences (BIO))",
+  "2025-7-23 (4th wed in July, annually)",
+  "https://new.nsf.gov/funding/opportunities/career-faculty-early-career-development-program",
+  "Supports early-career faculty who have the potential to serve as academic role models in research and education and to lead advances in the mission of their department or organization.",
+  
+  "Enabling Discovery through GEnomics (EDGE)",
+  "21-546",
+  "Integrative Organismal Systems (BIO/IOS)",
+  "2025-2-20 (3rd Thurs in Feb Annually)",
+  "https://new.nsf.gov/funding/opportunities/edge-enabling-discovery-through-genomics",
+  "Supports the development of genomic tools and research to uncover the relationships between genes and phenotypes across environmental, developmental, social and genomic contexts.",
+  
+  "Facilitating Research at Predominantly Undergraduate Institutions: (RUI and ROA-PUI)",
+  "14-579",
+  "Any (most likely Directorate for Biological Sciences (BIO))",
+  "Rolling or dependant on directorate",
+  "https://new.nsf.gov/funding/opportunities/rui-roa-pui-facilitating-research-predominantly-undergraduate",
+  "RUI proposals support PUI faculty in research that engages them in their professional field(s), builds capacity for research at their home institution, and supports the integration of research and undergraduate education."
+) %>%
+mutate(type = "Programs")
+
+nsf.supplement <- tribble(
+  ~name,
+  ~document,
+  ~division,
+  ~deadline,
+  ~link,
+  ~summary,
+  "Research Experience for Teachers (RET): Funding Opportunity in the Biological Sciences",
+  "23-146",
+  "Biological Sciences (BIO)",
+  "annually in Nov",
+  "https://new.nsf.gov/funding/opportunities/dcl-research-experience-teachers-ret-funding-opportunity",
+  "Encourages proposals or supplemental funding requests from current awardees of the Directorate for Biological Sciences to include participation of K-12 science educators in their projects."
+)  %>%
+mutate(type = "Supplement Awards")
+
+nsf.summary <- nsf.programs %>%
+               bind_rows(nsf.calls) %>%
+               bind_rows(nsf.supplement) %>%
+               arrange(type, document) %>%
+                mutate(type = str_to_upper(type)) %>%
+                select(type,
+                       name,
+                       document,
+                       division,
+                       summary,
+                       link)
+
+nsf.links <- nsf.summary %>% select(document, link)
+```
+
+```{r}
+foundation.grants <- tribble(
+  ~organization,
+  ~program_name,
+  ~org_mission,
+  ~comment,
+  ~deadline,
+  ~amount,
+  ~link,
+  
+  "Environmental Research & Education Foundation",
+  "Research Grants",
+  "EREF is one of the largest sources of private research funding in North America related to sustainable materials management. Our grants program has provided millions of dollars in funding to cutting edge research institutions to help address the many challenges that exist.",
+  "PFAS is identified under their 2nd of 3 priority areas - 'Emerging Contaminants'",
+  "2025-5-1 (Pre-proposal)",
+  "$160,000 (avg award)",
+  "https://erefdn.org/research-grants/",
+  
+  "The Nebraska Environmental Trust",
+  "Grant",
+  "Must address one of the four environmental categories: Habitat, Surface and Ground Water, Waste Management, Air Quality, Soil Management.",
+  "",
+  "2025-9-2 (Tues after Labor Day Annually)",
+  "$50,000+",
+  "https://environmentaltrust.nebraska.gov/grants/index.html"
+)
+```
+

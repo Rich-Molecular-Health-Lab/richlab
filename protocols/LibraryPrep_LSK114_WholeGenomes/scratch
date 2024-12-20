@@ -1,0 +1,16 @@
+render_step_progress <- function(step_log, step) {
+  output$step_progress <- renderUI({
+  req(step_log)
+  tagList(
+    lapply(names(step_log), function(step) {
+      card(
+        card_header(paste("Step:", step)),
+        card_body(
+          tags$p(paste("Timestamp:", format(step_log[[step]]$timestamp, "%Y-%m-%d %H:%M:%S"))),
+          tags$p(paste("Note:", step_log[[step]]$note))
+        )
+      )
+    })
+  )
+})
+}

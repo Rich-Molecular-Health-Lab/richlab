@@ -1,0 +1,80 @@
+
+Select Input
+<- reactiveVal(input$author)
+<- reactiveVal(input$assist)
+<- reactiveVal(input$flowcell_type)
+<- reactiveVal(input$minion)
+<- reactiveVal(input$fragments)
+<- reactiveVal(input$strands)
+
+Numeric Input
+input$fragment_length
+input$input_confirmed
+input[[paste0("qc1_", TubeNo)]]
+input[[paste0("qc2_", TubeNo)]]
+
+Date Input
+input$exp_date
+input$end_date
+
+Text Input
+input$flowcell_num
+input$start_note
+input$end_note
+
+Action Buttons
+input$submit_start_note
+input$setup_done
+input$endprep_done
+input$adapter_done
+input$cleanup_done
+input$flowcell_done
+input$generate_report
+input$download_report
+
+Checkbox
+input$add_rxnmix
+input$add_template
+
+LibPrepBy    
+LibPrepDate   
+FlowCellType 
+FlowCellSerial
+SeqDevice   
+
+TubeNo
+ExtractID  
+ExtractConc
+SampleID   
+
+Length
+
+InputMassStart
+InputMassFinal
+ExtractInputVol
+ExtractDiluteWater
+
+Conc_QC1
+Conc_QC2
+AdjustLibrary
+LibraryLoadingVol
+LibraryWaterVol
+
+columns = 
+list(
+TubeNo
+ExtractID  
+ExtractConc
+ExtractInputVol
+ExtractDiluteWater
+SampleID  
+LibPrepBy    
+LibPrepDate   
+FlowCellType 
+FlowCellSerial
+SeqDevice 
+Length
+InputMassStart
+InputMassFinal
+.selection
+)

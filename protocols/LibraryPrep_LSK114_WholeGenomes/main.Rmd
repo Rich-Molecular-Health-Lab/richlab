@@ -1,0 +1,228 @@
+---
+title: "LSK Library Prep for Whole Genome"
+author: "Alicia M. Rich, Ph.D."
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme:
+      bootswatch: yeti
+runtime: shiny
+params:
+  base_path: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/protocols/LibraryPrep_LSK114_WholeGenomes/"
+  local: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  laptop: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  desktop: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+  
+---
+
+# Set Global Parameters
+
+```{r global, include=F}
+params <- list(
+  local     = paste0(params$local),
+  base_path = paste0(params$local, "protocols/LibraryPrep_LSK114_WholeGenomes/"))
+source(paste0(params$base_path, "global.R"))
+opts_chunk$set(message = FALSE,
+               warning = FALSE,
+               echo    = FALSE,
+               include = TRUE,
+               eval    = TRUE)
+```
+
+# Source Scripts
+
+```{r}
+source(paste0(params$base_path, "ui/ui_tabs.R"))
+source(paste0(params$base_path, "resources/assets_loader.R"))
+source(paste0(params$base_path, "ui/steps/endprep_steps.R"))
+source(paste0(params$base_path, "ui/steps/adapter_steps.R"))
+source(paste0(params$base_path, "ui/steps/cleanup_steps.R"))
+source(paste0(params$base_path, "ui/steps/flowcell_steps.R"))
+source(paste0(params$base_path, "ui/steps/step_definitions.R"))
+```
+
+# UI
+
+```{r}
+ui <- page_fillable(
+  useShinyjs(),
+  navset_tab(
+    id = "main.nav", 
+    setup_tab(), 
+    nav_menu(
+      "Protocol Steps",
+      endprep_tab(),
+      adapter_tab(),
+      cleanup_tab(),
+      flowcell_tab()),
+    conclude_tab()
+))
+```
+
+```{r, context = "server"}
+server <- function(input, output, session) {
+  
+base_path  <- paste0(params$base_path)
+local_path <- paste0(params$local)
+
+session$setCurrentTheme(bs_theme(bootswatch = "lumen"))
+
+endprep  <- endprep 
+adapter  <- adapter 
+cleanup  <- cleanup 
+flowcell <- flowcell
+
+steps      <- c(endprep, adapter, cleanup, flowcell)
+
+n_rxns                <- reactiveVal(1)
+n_controls            <- reactiveVal(0)
+InputMassStart        <- reactiveVal(1000)
+Length                <- reactiveVal(10000)
+fragment_type         <- reactiveVal(1)
+strands               <- reactiveVal(2)
+InputMassFinal        <- reactiveVal(300)
+TemplateVolPrep       <- reactiveVal(47)
+TemplateVolLoading    <- reactiveVal(12)
+file_prefix           <- reactiveVal(NULL)
+
+
+data <- reactiveValues(libraries = tibble(
+    TubeNo              = integer(),
+    ExtractID           = character(),
+    ExtractConc         = numeric(),
+    Strands             = numeric(),
+    Length              = numeric(),
+    InputMassStart      = numeric(),
+    ExtractInputVol     = numeric(),
+    ExtractDiluteWater  = numeric(),
+    LibPrepBy           = character(),
+    LibPrepDate         = as.Date(character()),
+    FlowCellType        = character(),
+    FlowCellSerial      = character(),
+    SeqDevice           = character(),
+    Conc_QC1            = numeric(),
+    Conc_QC2            = numeric(),
+    InputMassFinal      = numeric(),
+    AdjustLibrary       = character(),
+    LibraryLoadingVol   = numeric(),
+    LibraryWaterVol     = numeric(),
+    SampleID            = character())
+)
+
+  source(paste0(params$base_path, "server/helper_functions.R"))
+  source(paste0(params$base_path, "resources/assets_loader.R"))
+  source(paste0(params$base_path, "resources/data_loader.R"))
+  source(paste0(params$base_path, "resources/data_gt.R"))
+  source(paste0(params$base_path, "server/ui_logic.R"))
+  source(paste0(params$base_path, "server/reactable_columns.R"))
+  source(paste0(params$base_path, "server/observers.R"))
+
+  
+rxns                  <- reactiveValues(endprep   = rxn_endprep, 
+                                        adapter   = rxn_adapter, 
+                                        fc_prime  = rxn_fcprime, 
+                                        fc_load   = rxn_fcload)
+
+link_tabs(input)
+
+step_data <- initialize_step_data(steps)
+  
+observe_steps(input, output, session, steps, step_data)
+
+render_images(output)
+render_dynamic_cards(output)
+
+report_observer(input, output, step_data, file_prefix)
+
+output$download_csv <- downloadHandler(
+    filename = function() {
+      paste0(file_prefix(), ".csv")
+      },
+    content  = function(file) { 
+      req(data$libraries)
+      data_output <- isolate(data$libraries) %>% tibble()
+      write.csv(data_output, file)  
+  }
+)
+
+samples_count_ui(input, output, samples.loris)
+adjust_length_ui(output, Length)
+adjust_input_ui(output, InputMassStart)
+checklist_tubes_ui(output, data)
+QC1_input_render(output, data, QC1_input_with_check)
+QC2_input_render(output, data, QC2_input_with_check)
+
+count_controls(input, n_controls)
+select_samples(samples.loris, data, n_controls)
+
+
+observe_exp_submit(input, data, file_prefix)
+observe_type(input, data, fragment_type, Length, strands, calculate_length, InputMassStart, calculate_mass_start)
+observe_strands(input, strands, InputMassStart, calculate_mass_start, fragment_type, Length)
+observe_length(input, data, Length, fragment_type, strands, InputMassStart, calculate_mass_start)
+observe_input(input, data, InputMassStart)
+observe_recalculate(input, data, n_rxns, rxns, rxn_vols, TemplateVolPrep, TemplateVolLoading, InputMassStart, InputMassFinal, calculate_mass_final, fragment_type, Length, strands)
+QC1_observer(input, data)
+QC2_observer(input, data, TemplateVolLoading)
+
+output$samples <- renderReactable({
+  req(samples.loris)
+    reactable(samples.loris, 
+            groupBy             = c("SampleID"),
+            details             = function(index) seq_subtable(index, samples.loris),
+            columns             = columns_samples,
+            columnGroups        = groups_samples,
+            theme               = format_select,
+            selection           = "multiple", 
+            onClick             = "select",
+            showPageSizeOptions = TRUE, 
+            highlight           = TRUE, 
+            compact             = TRUE)
+})
+
+render_reactable(output, "setup_summary"   , reactive({data$libraries}), columns_setup_summary)
+render_reactable(output, "extract_prep"    , reactive({data$libraries}), columns_extract_prep,
+      theme               = format_checklist,
+      selection           = "multiple", 
+      onClick             = "select")
+render_reactable(output, "endprep_react"   , reactive({rxns$endprep})  , columns_rxns,
+      theme               = format_checklist,
+      selection           = "multiple", 
+      onClick             = "select")
+render_reactable(output, "adapter_react"   , reactive({rxns$adapter }) , columns_rxns,
+      theme               = format_checklist,
+      selection           = "multiple", 
+      onClick             = "select")
+render_reactable(output, "fcprime_react"   , reactive({rxns$fc_prime}) , columns_rxns,
+      theme               = format_checklist,
+      selection           = "multiple", 
+      onClick             = "select")
+render_reactable(output, "fcload_react"    , reactive({rxns$fc_load }) , columns_rxns,
+      theme               = format_checklist,
+      selection           = "multiple", 
+      onClick             = "select")
+render_reactable(output, "qc_results"      , reactive({data$libraries}), columns_qc_results)
+render_reactable(output, "dilute_libraries" , reactive({data$libraries}), columns_dilute_libraries,
+      theme               = format_checklist,
+      selection           = "multiple", 
+      onClick             = "select")
+render_reactable(output, "final_libraries" , reactive({data$libraries}), columns_final_libraries)
+
+output$supplies_all      <- render_gt({gt_supplies})
+output$supplies_endprep  <- render_gt({supplies_endprep})
+output$kit_contents      <- render_gt({SQK.LSK114.contents})
+output$supplies_adapter  <- render_gt({supplies_adapter})
+output$supplies_cleanup  <- render_gt({supplies_cleanup})
+output$supplies_flowcell <- render_gt({supplies_flowcell})
+output$input_dna         <- render_gt({input_dna})
+output$flowcell_check    <- render_gt({flowcell_check})
+
+
+}
+```
+
+# Run the Shiny app
+```{r}
+shinyApp(ui = ui, server = server, options = "test.mode")
+```
+

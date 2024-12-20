@@ -1,0 +1,66 @@
+---
+title: "Lab Notebook Entry"
+author: "`r params$author`"
+date: "`r params$date`"
+output: 
+  html_document:
+    code_download: true
+    toc: true
+    toc_location: "before"
+    toc_depth: 4
+    number_sections: false
+    toc_float: true
+    code_folding: "hide"
+    fig_caption: true
+params:
+    author: NA
+    date: NA
+    steps: NA
+    
+---
+
+```{r include=FALSE}
+opts_chunk$set(message = FALSE,
+               warning = FALSE,
+               echo    = TRUE,
+               include = TRUE,
+               eval    = TRUE)
+
+library(knitr)
+library(bookdown)
+library(conflicted)
+library(devtools)
+library(dplyr)
+library(gt)
+library(gtExtras)
+library(gtable)
+library(htmltools)
+library(kableExtra)
+library(lubridate)
+library(paletteer)
+library(pandoc)
+library(readr) 
+library(tibble)
+library(tidyr)
+library(usethis)
+library(xfun)
+```
+
+
+## Library Prep
+
+```{r}
+
+tagList(
+        tags$ol(
+          lapply(params$steps, function(step) {
+            tagList(
+            tags$li(step$detail),
+            tags$p(step$timestamp),
+            if (!is.null(step$note)) tags$blockquote(step$note),
+            tags$hr()
+            )
+          })
+        )
+      )
+```

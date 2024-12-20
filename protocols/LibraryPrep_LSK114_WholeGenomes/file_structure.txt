@@ -1,0 +1,43 @@
+app/
+├── app.R
+├── global.R
+├── server/
+│   ├── server_main.R
+│   ├── helpers/
+│   │   ├── make_steps.R
+│   │   ├── helper_functions.R
+│   │   ├── observers.R
+│   ├── outputs/
+│   │   ├── reactable_outputs.R
+│   │   ├── render_gt_outputs.R
+│   │   ├── render_images.R
+│   ├── logic/
+│       ├── ui_logic.R
+├── ui/
+│   ├── ui_main.R
+│   ├── ui_tabs.R
+│   ├── steps/
+│   │   ├── step_definitions.R
+│   │   ├── endprep_steps.R
+│   │   ├── adapter_steps.R
+│   │   ├── cleanup_steps.R
+│   │   ├── flowcell_steps.R
+├── resources/
+│   ├── data_loader.R
+│   ├── data_gt.R
+│   ├── parameters.R
+│   ├── assets_loader.R
+│   ├── images/
+│       ├── SQK-LSK114_bottle.svg
+│       ├── SQK-LSK114_tubes.svg
+│       ├── Flow_Cell_Loading_Diagrams_Step_1a.svg
+│       ├── Flow_Cell_Loading_Diagrams_Step_1b.svg
+│       ├── Flow_Cell_Loading_Diagrams_Step_2.svg
+│       ├── Flow_Cell_Loading_Diagrams_Step_03_V5.gif
+│       ├── Flow_Cell_Loading_Diagrams_Step_04_V5.gif
+│       ├── Flow_Cell_Loading_Diagrams_Step_5.svg
+│       ├── Flow_Cell_Loading_Diagrams_Step_06_V5.gif
+│       ├── Flow_Cell_Loading_Diagrams_Step_07_V5.gif
+│       ├── Flow_Cell_Loading_Diagrams_Step_9.svg
+│       ├── Step_8_update.png
+│       ├── J2264_-_Light_shield_animation_Flow_Cell_FAW_optimised.gif

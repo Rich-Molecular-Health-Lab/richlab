@@ -7,7 +7,8 @@ source(paste0(params$local, "protocols/builds/RxnMix_AdapterLigation_SQK_LSK114.
 source(paste0(params$local, "protocols/builds/RxnMix_FlowCell_SQK_LSK114.R"))
 source(paste0(params$local, "protocols/builds/ProtocolSteps_SQK_LSK114.R"))
 source(paste0(params$local, "protocols/builds/parameters.R"))
-source(paste0(params$local, "protocols/builds/Samples.R"))
+source(paste0(params$local, "protocols/builds/server_data_SQK_LSK114.R"))
+source(paste0(params$local, "protocols/builds/server_functions_SQK_LSK114.R"))
 
 make_steps <- function(nested_steps) {
   imap(nested_steps, ~ {

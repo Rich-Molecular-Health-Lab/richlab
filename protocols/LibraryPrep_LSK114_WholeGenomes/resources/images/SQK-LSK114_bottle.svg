@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 26.5.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_2_00000135686596626015332990000016480687316119436435_"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 1517 774.1"
+	 style="enable-background:new 0 0 1517 774.1;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:none;stroke:#FFFFFF;stroke-width:3;stroke-miterlimit:10;}
+	.st1{fill:#1D1D1B;}
+	.st2{font-family:'Arial';}
+	.st3{font-size:32px;}
+	.st4{letter-spacing:-2;}
+	.st5{fill:#009739;stroke:#3D3D3B;stroke-width:2;stroke-miterlimit:10;}
+	.st6{fill:#FFFFFF;stroke:#3D3D3B;stroke-miterlimit:10;}
+	.st7{fill:#1E1E1C;}
+	.st8{font-size:20px;}
+	.st9{fill:#FFDD08;stroke:#3D3D3B;stroke-width:2;stroke-miterlimit:10;}
+	.st10{fill:#ECECEC;stroke:#3D3D3B;stroke-width:2;stroke-miterlimit:10;}
+	.st11{fill:#F6B4BD;stroke:#3D3D3B;stroke-miterlimit:10;}
+	.st12{fill:#DE3A8D;stroke:#3D3D3B;stroke-width:2;stroke-miterlimit:10;}
+	.st13{fill:none;stroke:#3C3C3B;stroke-width:5;stroke-miterlimit:10;}
+	.st14{fill:#F39200;stroke:#3C3C3B;stroke-width:2;stroke-miterlimit:10;}
+	.st15{fill:#FFFFFF;stroke:#3C3C3B;stroke-miterlimit:10;}
+	.st16{fill:#E52528;stroke:#3C3C3B;stroke-width:2;stroke-miterlimit:10;}
+	.st17{fill:none;stroke:#3D3D3B;stroke-width:5;stroke-miterlimit:10;}
+	.st18{fill:#8A5E13;stroke:#3C3C3B;stroke-width:2;stroke-miterlimit:10;}
+	.st19{fill:#76C2E3;stroke:#3D3D3B;stroke-width:2;stroke-miterlimit:10;}
+	.st20{font-size:25.48px;}
+	.st21{fill:#81368B;stroke:#3D3D3B;stroke-width:2;stroke-miterlimit:10;}
+</style>
+<g id="Layer_2-2">
+	<line class="st0" x1="0" y1="1.5" x2="1517" y2="1.5"/>
+</g>
+<g id="Layer_2-2_00000096050197127613939890000004376571149504989322_">
+	<text transform="matrix(1 0 0 1 312.7852 577.9371)" class="st1 st2 st3">DCS</text>
+	<text transform="matrix(1 0 0 1 401.4651 577.9371)" class="st1 st2 st3">DN</text>
+	<text transform="matrix(1 0 0 1 447.6852 577.9371)" class="st1 st2 st3">A</text>
+	<text transform="matrix(1 0 0 1 467.2652 577.9371)" class="st1 st2 st3"> Control Strand</text>
+	<text transform="matrix(1 0 0 1 385.0952 577.9371)" class="st1 st2 st3">:</text>
+	<text transform="matrix(1 0 0 1 338.0052 617.1871)" class="st1 st2 st3">L</text>
+	<text transform="matrix(1 0 0 1 355.8052 617.1871)" class="st1 st2 st3">A</text>
+	<text transform="matrix(1 0 0 1 401.5152 616.1871)" class="st1 st2 st3">Ligation</text>
+	<text transform="matrix(1 0 0 1 520.7352 616.1871)" class="st1 st2 st3">Adapter</text>
+	<text transform="matrix(1 0 0 1 385.0952 616.1871)" class="st1 st2 st3">:</text>
+	<text transform="matrix(1 0 0 1 899.8652 655.4471)" class="st1 st2 st3">LIB</text>
+	<text transform="matrix(1 0 0 1 972.7051 654.4271)" class="st1 st2 st3">Library Beads</text>
+	<text transform="matrix(1 0 0 1 954.6552 654.4271)" class="st1 st2 st3">:</text>
+	<text transform="matrix(1 0 0 1 906.2551 616.1771)" class="st1 st2 st3">EB</text>
+	<g>
+		<text transform="matrix(1 0 0 1 972.7051 616.1771)" class="st1 st2 st3">Elution Bu</text>
+		<text transform="matrix(1 0 0 1 1118.5852 616.1771)" class="st1 st2 st3">f</text>
+		<text transform="matrix(1 0 0 1 1126.8951 616.1771)" class="st1 st2 st3">fer</text>
+	</g>
+	<text transform="matrix(1 0 0 1 954.6552 616.1771)" class="st1 st2 st3">:</text>
+	<text transform="matrix(1 0 0 1 318.0952 655.1771)" class="st1 st2 st3">LNB</text>
+	<g>
+		<text transform="matrix(1 0 0 1 401.4651 654.6171)" class="st1 st2 st3">Ligation Bu</text>
+		<text transform="matrix(1 0 0 1 561.5952 654.6171)" class="st1 st2 st3">f</text>
+		<text transform="matrix(1 0 0 1 569.9052 654.6171)" class="st1 st2 st3">fer</text>
+	</g>
+	<text transform="matrix(1 0 0 1 385.0952 654.6171)" class="st1 st2 st3">:</text>
+	<text transform="matrix(1 0 0 1 901.4252 691.9471)" class="st1 st2 st3">LIS</text>
+	<text transform="matrix(1 0 0 1 972.7051 692.8571)" class="st1 st2 st3">Library Solution</text>
+	<text transform="matrix(1 0 0 1 954.6552 692.8571)" class="st1 st2 st3">:</text>
+	<text transform="matrix(1 0 0 1 321.6652 693.7971)" class="st1 st2 st3">LFB</text>
+	<text transform="matrix(1 0 0 1 385.0952 693.7971)" class="st1 st2 st3">:</text>
+	<text transform="matrix(1 0 0 1 318.1152 733.157)" class="st1 st2 st3">SFB</text>
+	<text transform="matrix(1 0 0 1 397.8951 735.3671)" class="st1 st2 st3">Short Fragment Bu</text>
+	<text transform="matrix(1 0 0 1 668.2352 735.3671)" class="st1 st2 st3">f</text>
+	<text transform="matrix(1 0 0 1 676.5552 735.3671)" class="st1 st2 st3">fer</text>
+	<text transform="matrix(1 0 0 1 383.8652 733.157)" class="st1 st2 st3">:</text>
+	<text transform="matrix(1 0 0 1 907.5352 576.6171)" class="st1 st2 st3">SB</text>
+	<g>
+		<text transform="matrix(1 0 0 1 971.7751 577.9371)" class="st1 st2 st3">Sequencing Bu</text>
+		<text transform="matrix(1 0 0 1 1188.8352 577.9371)" class="st1 st2 st3">f</text>
+		<text transform="matrix(1 0 0 1 1197.1552 577.9371)" class="st1 st2 st3">fer</text>
+	</g>
+	<text transform="matrix(1 0 0 1 952.7352 577.9371)" class="st1 st2 st3">:</text>
+	<text transform="matrix(1 0 0 1 891.0452 732.037)" class="st1 st2 st3">FCF</text>
+	<text transform="matrix(1 0 0 1 972.7051 732.0271)" class="st1 st2 st3">Flow Cell Flush</text>
+	<text transform="matrix(1 0 0 1 954.6552 732.0271)" class="st1 st2 st3">:</text>
+	<text transform="matrix(1 0 0 1 887.9352 771.8371)" class="st1 st2 st3">FC</text>
+	<text transform="matrix(1 0 0 1 930.5952 771.8371)" class="st1 st2 st3">T</text>
+	<text transform="matrix(1 0 0 1 972.7051 771.3971)" class="st1 st2 st3">Flow Cell</text>
+	<text transform="matrix(1 0 0 1 1104.2852 771.3971)" class="st1 st2 st3"> </text>
+	<text transform="matrix(1 0 0 1 1112.5952 771.3971)" class="st1 st2 st3 st4">T</text>
+	<text transform="matrix(1 0 0 1 1128.5952 771.3971)" class="st1 st2 st3">ether</text>
+	<text transform="matrix(1 0 0 1 954.6552 771.3971)" class="st1 st2 st3">:</text>
+	<g>
+		<text transform="matrix(1 0 0 1 317.5352 771.3971)" class="st1 st2 st3">AX</text>
+		<text transform="matrix(1 0 0 1 360.2252 771.3971)" class="st1 st2 st3">P</text>
+	</g>
+	<text transform="matrix(1 0 0 1 401.5152 771.3971)" class="st1 st2 st3">AMPure X</text>
+	<text transform="matrix(1 0 0 1 547.3452 771.3971)" class="st1 st2 st3">P</text>
+	<text transform="matrix(1 0 0 1 568.1152 771.3971)" class="st1 st2 st3"> Beads</text>
+	<text transform="matrix(1 0 0 1 383.8652 771.3971)" class="st1 st2 st3">:</text>
+	<text transform="matrix(1 0 0 1 398.9852 695.4471)" class="st1 st2 st3">Long Fragment Bu</text>
+	<text transform="matrix(1 0 0 1 664.0352 695.4471)" class="st1 st2 st3">f</text>
+	<text transform="matrix(1 0 0 1 672.3452 695.4471)" class="st1 st2 st3">fer</text>
+</g>
+<path class="st5" d="M983.8,25.5c23.5-3.1,45,13.4,48.1,36.9s-13.4,45-36.9,48.1s-45-13.4-48.1-36.9l0,0
+	C943.8,50.1,960.3,28.6,983.8,25.5"/>
+<path class="st6" d="M1021.8,63.7c2.3,17.9-10.2,34.3-28.1,36.6c-17.9,2.4-34.3-10.2-36.6-28.1s10.2-34.3,28.1-36.6l0,0
+	C1003,33.4,1019.4,46,1021.8,63.7z"/>
+<text transform="matrix(1 0 0 1 988.3351 73.392)" class="st7 st2 st8 st4">A</text>
+<text transform="matrix(1 0 0 1 977.2151 73.392)" class="st7 st2 st8">L</text>
+<path class="st9" d="M871.2,25.5c23.5-3.1,45,13.4,48.1,36.9s-13.4,45-36.9,48.1s-45-13.4-48.1-36.9l0,0
+	C831.2,50.2,847.6,28.6,871.2,25.5"/>
+<path class="st6" d="M909.1,63.7c2.4,17.9-10.1,34.3-28,36.7s-34.3-10.1-36.7-28s10.1-34.3,28-36.7h0.2
+	C890.4,33.5,906.7,46,909.1,63.7z"/>
+<text transform="matrix(1 0 0 1 855.6552 73.3721)" class="st7 st2 st8">DCS</text>
+<g>
+	<path class="st10" d="M918.4,272.7c3.1,23.5-13.4,45-36.9,48.1s-45-13.4-48.1-36.9s13.4-45,36.9-48.1l0,0
+		C893.8,232.7,915.3,249.2,918.4,272.7L918.4,272.7L918.4,272.7z"/>
+	<path class="st6" d="M908.3,274.1c2.3,17.9-10.3,34.3-28.1,36.6c-17.9,2.3-34.3-10.3-36.6-28.1c-2.3-17.8,10.2-34.2,28-36.6
+		C889.5,243.6,905.9,256.2,908.3,274.1L908.3,274.1L908.3,274.1z"/>
+	<text transform="matrix(1 0 0 1 857.1951 284.3321)" class="st7 st2 st8">SFB</text>
+</g>
+<g>
+	<path class="st10" d="M1140.2,380.8c3.1,23.5-13.4,45-36.9,48.1s-45-13.4-48.1-36.9s13.4-45,36.9-48.1l0,0
+		C1115.5,340.8,1137,357.3,1140.2,380.8L1140.2,380.8z"/>
+	<path class="st11" d="M1130,382.1c2.3,17.9-10.2,34.3-28.1,36.6c-17.9,2.3-34.3-10.2-36.6-28.1c-2.3-17.9,10.2-34.3,28.1-36.6l0,0
+		C1111.3,351.8,1127.6,364.3,1130,382.1z"/>
+	<text transform="matrix(1 0 0 1 1082.6152 391.7321)" class="st7 st2 st8">LIS</text>
+</g>
+<g>
+	<path class="st12" d="M1031.9,380.8c3.1,23.5-13.4,45-36.9,48.1s-45-13.4-48.1-36.9s13.4-45,36.9-48.1l0,0
+		C1007.3,340.8,1028.8,357.3,1031.9,380.8L1031.9,380.8z"/>
+	<path class="st6" d="M1021.8,382.2c2.3,17.9-10.2,34.3-28.1,36.6c-17.9,2.3-34.3-10.2-36.6-28.1s10.2-34.3,28.1-36.6l0,0
+		C1003.1,351.8,1019.4,364.3,1021.8,382.2z"/>
+	<text transform="matrix(1 0 0 1 974.4651 391.752)" class="st7 st2 st8">LIB</text>
+</g>
+<path class="st10" d="M1092.1,25.5c23.5-3.1,45,13.4,48.1,36.9s-13.4,45-36.9,48.1s-45-13.4-48.1-36.9l0,0
+	C1052.1,50.2,1068.5,28.7,1092.1,25.5"/>
+<path class="st6" d="M1130,63.8c2.3,17.9-10.2,34.3-28.1,36.6c-17.9,2.3-34.3-10.2-36.6-28.1c-2.3-17.9,10.2-34.3,28.1-36.6l0,0
+	C1111.3,33.4,1127.6,45.9,1130,63.8z"/>
+<text transform="matrix(1 0 0 1 1078.1752 73.392)" class="st7 st2 st8">LNB</text>
+<path class="st13" d="M603.4,334.5c7.8,58.8-34.3,112.7-94.2,120.5c-60,7.7-114.9-33.6-122.9-92.4s34.3-112.7,94.2-120.5l0,0
+	C540.6,234.2,595.6,275.6,603.4,334.5L603.4,334.5z"/>
+<g>
+	<path class="st14" d="M919.3,167.1c3.1,23.5-13.4,45-36.9,48.1s-45-13.4-48.1-36.9s13.4-45,36.9-48.1l0,0
+		C894.7,127.1,916.2,143.6,919.3,167.1z"/>
+	<path class="st15" d="M909.1,168.4c2.3,17.8-10.2,34.2-28.1,36.6c-17.9,2.4-34.2-10.2-36.6-28.1c-2.3-17.8,10.2-34.2,28.1-36.6l0,0
+		C890.4,138,906.7,150.6,909.1,168.4z"/>
+</g>
+<g>
+	<path class="st16" d="M1139.2,272.7c3.1,23.5-13.4,45-36.9,48.1s-45-13.4-48.1-36.9s13.4-45,36.9-48.1l0,0
+		C1114.6,232.7,1136.1,249.2,1139.2,272.7L1139.2,272.7L1139.2,272.7z"/>
+	<path class="st15" d="M1129,274.1c2.3,17.9-10.2,34.2-28.1,36.6s-34.2-10.2-36.6-28.1c-2.3-17.9,10.2-34.2,28.1-36.6l0,0
+		C1110.3,243.7,1126.6,256.2,1129,274.1L1129,274.1z"/>
+	<text transform="matrix(1 0 0 1 1083.3853 283.742)" class="st1 st2 st8">SB</text>
+</g>
+<g>
+	<path class="st1" d="M919.3,380.8c3.1,23.5-13.4,45-36.9,48.1s-45-13.4-48.1-36.9s13.4-45,36.9-48.1l0,0
+		C894.7,340.8,916.2,357.3,919.3,380.8L919.3,380.8z"/>
+	<path class="st15" d="M909.1,382.1c2.4,17.9-10.2,34.2-28,36.6s-34.2-10.2-36.6-28c-2.4-17.8,10.2-34.2,28-36.6l0,0
+		C890.4,351.8,906.7,364.3,909.1,382.1L909.1,382.1z"/>
+	<text transform="matrix(1 0 0 1 863.4551 391.712)" class="st1 st2 st8">EB</text>
+</g>
+<path class="st17" d="M794.2,114.2c5.9,44.1-25.9,84.6-71.1,90.4s-86.7-25.3-92.6-69.4c-5.9-44.1,25.9-84.6,71.1-90.4
+	S788.3,70,794.2,114.2z"/>
+<path class="st17" d="M798.2,345.2c5.9,44.1-25.9,84.6-71.1,90.4s-86.7-25.3-92.6-69.4c-5.9-44.1,25.9-84.6,71.1-90.4
+	S792.3,301,798.2,345.2z"/>
+<text transform="matrix(1 0 0 1 858.4651 178.022)" class="st1 st2 st8">LFB</text>
+<g>
+	<path class="st14" d="M1031.9,167.1c3.1,23.5-13.4,45-36.9,48.1s-45-13.4-48.1-36.9s13.4-45,36.9-48.1l0,0
+		C1007.3,127.1,1028.8,143.6,1031.9,167.1z"/>
+	<path class="st15" d="M1021.7,168.4c2.3,17.8-10.2,34.2-28.1,36.6s-34.2-10.2-36.6-28.1c-2.3-17.8,10.2-34.2,28.1-36.6l0,0
+		C1003,138,1019.3,150.6,1021.7,168.4z"/>
+</g>
+<text transform="matrix(1 0 0 1 971.0952 178.022)" class="st1 st2 st8">LFB</text>
+<path class="st18" d="M1140.2,167.1c3.1,23.5-13.5,45-36.9,48.1s-45-13.4-48.1-36.9s13.4-45,36.9-48.1l0,0
+	C1115.5,127.1,1137.1,143.6,1140.2,167.1z"/>
+<path class="st15" d="M1130,168.4c2.3,17.9-10.2,34.2-28.1,36.6s-34.2-10.2-36.6-28.1c-2.3-17.9,10.2-34.2,28.1-36.6l0,0
+	C1111.2,138,1127.6,150.6,1130,168.4z"/>
+<text transform="matrix(1 0 0 1 1077.8352 178.022)" class="st1 st2 st8">AX</text>
+<text transform="matrix(1 0 0 1 1104.5151 178.022)" class="st1 st2 st8">P</text>
+<g>
+	<path class="st10" d="M1031,272.7c3.1,23.5-13.4,45-36.9,48.1s-45-13.4-48.1-36.9s13.4-45,36.9-48.1l0,0
+		C1006.4,232.7,1027.9,249.2,1031,272.7L1031,272.7L1031,272.7z"/>
+	<path class="st6" d="M1020.9,274.1c2.3,17.9-10.3,34.3-28.1,36.6c-17.9,2.3-34.3-10.3-36.6-28.1c-2.3-17.8,10.2-34.2,28-36.6
+		C1002.1,243.6,1018.5,256.2,1020.9,274.1L1020.9,274.1L1020.9,274.1z"/>
+	<text transform="matrix(1 0 0 1 969.8152 284.3321)" class="st7 st2 st8">SFB</text>
+</g>
+<path class="st17" d="M1031,489.7c3.1,23.5-13.4,45-36.9,48.1s-45-13.4-48.1-36.9c-3.1-23.5,13.4-45,36.9-48.1l0,0
+	C1006.4,449.7,1027.9,466.2,1031,489.7L1031,489.7z"/>
+<path class="st17" d="M1139.2,489.7c3.1,23.5-13.4,45-36.9,48.1s-45-13.4-48.1-36.9c-3.1-23.5,13.4-45,36.9-48.1l0,0
+	C1114.6,449.7,1136.1,466.2,1139.2,489.7L1139.2,489.7z"/>
+<path class="st19" d="M416.1,130.9c-6.2-45.8,25.8-87.9,71.4-94s87.8,25.9,93.9,71.6c6.1,45.7-25.9,87.9-71.4,94
+	S422.2,176.7,416.1,130.9L416.1,130.9z"/>
+<path class="st15" d="M434.1,128.3C429.3,93,454.4,60.7,490,55.8s68.6,20,73.4,55.2c4.8,35.3-20.3,67.6-55.9,72.5
+	S438.9,163.6,434.1,128.3z"/>
+<text transform="matrix(1.03 0 0 1 473.4648 127.4771)" class="st7 st2 st20">FCF</text>
+<g>
+	<path class="st21" d="M918,491.4c3.1,23.5-13.4,45-36.9,48.1s-45-13.4-48.1-36.9s13.4-45,36.9-48.1l0,0
+		C893.4,451.4,914.9,467.9,918,491.4L918,491.4L918,491.4z"/>
+	<path class="st15" d="M907.9,492.8c2.3,17.9-10.2,34.3-28.1,36.6c-17.9,2.3-34.3-10.2-36.6-28.1c-2.3-17.9,10.2-34.3,28.1-36.6l0,0
+		C889.1,462.4,905.5,474.9,907.9,492.8z"/>
+	<text transform="matrix(1 0 0 1 856.25 502.36)" class="st7 st2 st8">FC</text>
+	<text transform="matrix(1 0 0 1 882.91 502.36)" class="st7 st2 st8">T</text>
+</g>
+</svg>

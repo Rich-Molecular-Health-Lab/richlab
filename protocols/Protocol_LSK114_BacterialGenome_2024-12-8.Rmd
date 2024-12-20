@@ -1,0 +1,106 @@
+---
+title: "LSK Library Prep for Whole Genome"
+author: "Alicia M. Rich, Ph.D."
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme:
+      bootswatch: yeti
+runtime: shiny
+params:
+  local: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  laptop: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  desktop: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+  
+---
+
+File Structure for this Script:
+
+```
+app/
+├── app.R                # Main Shiny app file
+├── server/
+│   ├── server_main.R       # Core server logic
+│   ├── make_steps.R        # Function to make nested steps
+│   ├── observers.R         # Observers and dynamic updates
+│   ├── helper_functions.R  # Reusable utility functions
+│   ├── reactable_outputs.R # Reactable rendering functions
+│   ├── render_gt_outputs.R # gt rendering functions
+│   ├── render_images.R     # image rendering functions
+│   ├── ui_logic.R          # Render UI-specific server logic
+├── ui/
+│   ├── ui_main.R           # Main UI layout
+│   ├── ui_tabs.R           # Definitions for tabs (Setup, End Prep, etc.)
+│   ├── step_definitions.R  # Combining and naming steps across tabs
+│   ├── endprep_steps.R     # Setting the list of steps for the endprep tab
+│   ├── adapter_steps.R     # Setting the list of steps for the adapter tab
+│   ├── cleanup_steps.R     # Setting the list of steps for the cleanup tab
+│   ├── flowcell_steps.R    # Setting the list of steps for the flowcell tab
+├── resources/
+│   ├── assets.R            # Rendering code for JS, html, and other formats
+│   ├── parameters.R        # Setting paths and other parameters
+│   ├── data.R              # Loading dataframes and tibbles
+│   ├── gt_tables.R         # Building gt tabls from dataframes/tibbles
+│   ├── images/             # Image file attachments to render
+```
+
+
+```{r global, include=F}
+params <- list(
+  local = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  laptop = "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/",
+  desktop = "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
+)
+
+source(paste0(params$local, "dependencies/setup.R"))
+opts_chunk$set(message = FALSE,
+               warning = FALSE,
+               echo    = FALSE,
+               include = TRUE,
+               eval    = TRUE)
+
+source(paste0(params$local, "protocols/builds/Build_Protocol_SQK_LSK114.R"))
+
+```
+
+
+```{r, context = "server"}
+server <- function(input, output, session) {
+session$setCurrentTheme(bs_theme(bootswatch = "lumen"))
+
+tab.link("setup"   , "endprep")
+tab.link("endprep" , "adapter")
+tab.link("adapter" , "cleanup")
+tab.link("cleanup" , "flowcell")
+tab.link("flowcell", "closer")
+
+output$card_I.4.    <- renderUI({page_fluid(card(reactableOutput("endprep_react"), uiOutput("checklist_tubes")))})
+output$card_I.19.   <- renderUI(card(card_header("Enter QC Results:"), uiOutput("qc1_result")))
+output$card_II.5.   <- custom.card("gt_"      , "rxn_adapter")
+output$card_III.11. <- renderUI(card(card_header("Enter QC Results:"), uiOutput("qc2_result")))
+output$card_III.12. <- custom.card("reactable", "final_libraries")
+output$card_IV.2.   <- renderUI({page_fluid(card(gt_output("rxn_flowcell"), uiOutput("checklist_tubes")))})
+output$card_IV.3.   <- illustration2.card("imgIV3a", "imgIV3b")
+output$card_IV.4.   <- illustration.card( "imgIV4")
+output$card_IV.5.   <- illustration.card( "imgIV5")
+output$card_IV.6.   <- illustration.card( "imgIV6")
+output$card_IV.8.   <- illustration.card( "imgIV8")
+output$card_IV.9.   <- illustration2.card("imgIV9a", "imgIV9b")
+output$card_IV.11.  <- illustration.card( "imgIV11")
+output$card_IV.12.  <- illustration2.card("imgIV12a", "imgIV12b")
+
+
+data   <- reactiveValues(libraries = NULL)
+rxns   <- reactiveValues(endprep = NULL)
+n_rxns <- reactiveVal()
+
+}
+```
+
+
+
+
+
+```{r}
+shinyApp(ui = ui, server = server)
+```

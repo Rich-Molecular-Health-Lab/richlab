@@ -175,8 +175,6 @@ server <- function(input, output, session) {
           ""
         }})})})
   
-  
-  
   output$card_I.3.    <- renderUI({page_fluid(card(reactableOutput("extracts_endprep")))})
   output$card_I.5.    <- renderUI({page_fluid(card(reactableOutput("endprep_react"),
                                                    reactableOutput("endprep_tubes")))})
