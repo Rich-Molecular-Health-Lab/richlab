@@ -49,7 +49,7 @@ count_controls <- function(input, n_controls) {
   })
 }
 
-select_samples <- function(samples.loris, data, n_controls) {
+select_samples <- function(samples.loris, data, n_controls, n_samples) {
   
   observeEvent(getReactableState("samples", "selected"), {
     selected <- getReactableState("samples", "selected") %||% integer(0)
@@ -58,7 +58,7 @@ select_samples <- function(samples.loris, data, n_controls) {
       message("No rows selected.")
       return(NULL)
     }
-
+    
     selected_rows <- samples.loris[selected, ] %>%
       tibble() %>%
       mutate(TubeNo = row_number()) %>%
@@ -66,6 +66,8 @@ select_samples <- function(samples.loris, data, n_controls) {
              ExtractID   = ExtractID_DNA,
              ExtractConc = ExtractConc_DNA,
              SampleID)
+    
+    n_samples(nrow(selected_rows))
     
     control_rows <- tibble(
       TubeNo             = NA_integer_,
@@ -115,7 +117,7 @@ observe_type <- function(input, data, fragment_type, Length, strands, calculate_
   })
 }
 
-observe_exp_submit <- function(input, data, file_prefix) {
+observe_exp_submit <- function(input, data, report_params, file_prefix) {
   observeEvent(input$exp_submit, {
     data$libraries <- data$libraries %>%
       mutate(LibPrepBy      = input$author,
@@ -124,9 +126,13 @@ observe_exp_submit <- function(input, data, file_prefix) {
              FlowCellSerial = input$flowcell_num,
              SeqDevice      = input$minion)
     
-    last_name     <- str_extract(input$author, "\\w+(?=\\s)")
+    initials     <- str_extract(input$author, "(?<=\\()\\w+(?=\\))")
     
-    file_prefix(paste0(last_name, "_", input$exp_date))
+    file_prefix(paste0(initials, "_", input$exp_date))
+    
+    report_params$author  <- input$author
+    report_params$date    <- input$exp_date
+    report_params$assists <- input$assist
   })
 }
 
@@ -151,6 +157,7 @@ observe_input <- function(input, data, InputMassStart) {
 
 observe_recalculate <- function(input, 
                                 data, 
+                                report_params,
                                 n_rxns, 
                                 rxns, 
                                 rxn_vols, 
@@ -162,9 +169,8 @@ observe_recalculate <- function(input,
                                 fragment_type,
                                 Length,
                                 strands
-                                ) {
+) {
   observeEvent(input$recalculate, {
-    
     n_rxns(nrow(data$libraries))
     
     req(n_rxns())
@@ -192,6 +198,37 @@ observe_recalculate <- function(input,
         InputMassFinal = InputMassFinal())  %>%
       mutate(ExtractInputVol    = if_else((InputMassStart/ExtractConc) >= TemplateVolPrep(), TemplateVolPrep(), InputMassStart/ExtractConc)) %>%
       mutate(ExtractDiluteWater = TemplateVolPrep() - ExtractInputVol)
+    
+    report_params$n_samples      <- n_samples()
+    report_params$n_controls     <- n_controls()
+    report_params$total_rxns     <- n_rxns()
+    report_params$InputMassStart <- InputMassStart()
+    report_params$Length         <- Length()
+    report_params$fragment_type  <- fragment_type()
+    report_params$strands        <- strands()
+    report_params$InputMassFinal <- InputMassFinal()
+  })
+}
+
+observe_setup_note <- function(input, output, report_params) {
+  observeEvent(input$submit_start_note, {
+    timestamped_note <- paste0("Setup note recorded at ", paste(format(Sys.time(), "%Y-%m-%d %H:%M:%S")), " - ",  input$start_note)
+    
+    output$start_note_submitted <- renderText(timestamped_note)
+
+    report_params$setup_note <- timestamped_note
+  })
+}
+
+observe_conclusion_note <- function(input, output, report_params) {
+  timestamp <- paste(format(Sys.time(), "%Y-%m-%d %H:%M:%S"))
+  
+  observeEvent(input$generate_report, {
+    timestamped_note <- paste0("Concluding note recorded at ", paste(format(Sys.time(), "%Y-%m-%d %H:%M:%S")), " - ",  input$end_note)
+    
+    output$end_note_render <- renderText(timestamped_note)
+    
+    report_params$conclusion_note <- timestamped_note
   })
 }
 
@@ -201,10 +238,11 @@ QC1_observer <- function(input, data) {
     req(data$libraries$TubeNo)  
     data$libraries <- data$libraries %>%
       mutate(Conc_QC1 = map_dbl(TubeNo, ~ input[[paste0("QC1_", .x)]] %||% NA_real_))
+    
   })
 }
 
-QC2_observer <- function(input, data, TemplateVolLoading) {
+QC2_observer <- function(input, data, TemplateVolLoading, report_params) {
   observeEvent(input$confirm_qc2, {
     req(data$libraries$TubeNo)  
     data$libraries <- data$libraries %>%
@@ -223,54 +261,15 @@ QC2_observer <- function(input, data, TemplateVolLoading) {
         ),
         LibraryWaterVol = TemplateVolLoading() - LibraryLoadingVol
       )
-  })
-}
-
-report_observer <- function(input, output, step_data, file_prefix) {
-  observeEvent(input$generate_report, {
-    req(input$author, input$exp_date, step_data, file_prefix())
     
-    steps <- isolate(reactiveValuesToList(step_data))
+    report_params$QC <- isolate(data$libraries) %>%
+      select(TubeNo,
+             ExtractID,
+             ExtractConc,
+             LibQC1 = Conc_QC1, 
+             LibQC2 = Conc_QC2)
     
-    output$step_progress <- renderUI({
-      req(steps)
-      tagList(
-        tags$ol(
-          lapply(steps, function(step) {
-            tagList(
-            tags$li(step$detail),
-            tags$p(step$timestamp),
-            if (!is.null(step$note)) tags$blockquote(step$note),
-            tags$hr()
-            )
-          })
-        )
-      )
-    })
-    
-    output$download_report <- downloadHandler(
-      filename = function() {
-        paste0(file_prefix(), "_report.html")
-      },
-      content = function(file) {
-        tempReport <- file.path(tempdir(), "report.Rmd")
-        template <- paste0(params$base_path, "resources/report.Rmd")
-        file.copy(template, tempReport, overwrite = TRUE)
-        
-        params <- list(
-          author = input$author,   
-          date   = input$exp_date,
-          steps  = steps
-        )
-        
-        # Render R Markdown report
-        rmarkdown::render(
-          tempReport, 
-          output_file = file,
-          params      = params,
-          envir       = new.env(parent = globalenv())
-        )
-      }
-    )
+    report_params$TemplateVolPrep    <- TemplateVolPrep()
+    report_params$TemplateVolLoading <- TemplateVolLoading()
   })
 }

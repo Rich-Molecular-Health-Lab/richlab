@@ -8,8 +8,8 @@ output:
       bootswatch: yeti
 runtime: shiny
 params:
-  base_path: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/protocols/LibraryPrep_LSK114_WholeGenomes/"
-  local: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
+  base_path: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/protocols/LibraryPrep_LSK114_WholeGenomes/"
+  local: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
   laptop: "/Users/aliciamrich/RStudioMacbook/GitRepos/richlab_main/"
   desktop: "/Users/arich/Library/CloudStorage/GoogleDrive-aliciamrich@gmail.com/Other computers/My MacBook Pro/RStudioMacbook/GitRepos/richlab_main/"
   
@@ -76,6 +76,7 @@ steps      <- c(endprep, adapter, cleanup, flowcell)
 
 n_rxns                <- reactiveVal(1)
 n_controls            <- reactiveVal(0)
+n_samples             <- reactiveVal(0)
 InputMassStart        <- reactiveVal(1000)
 Length                <- reactiveVal(10000)
 fragment_type         <- reactiveVal(1)
@@ -84,7 +85,6 @@ InputMassFinal        <- reactiveVal(300)
 TemplateVolPrep       <- reactiveVal(47)
 TemplateVolLoading    <- reactiveVal(12)
 file_prefix           <- reactiveVal(NULL)
-
 
 data <- reactiveValues(libraries = tibble(
     TubeNo              = integer(),
@@ -109,14 +109,51 @@ data <- reactiveValues(libraries = tibble(
     SampleID            = character())
 )
 
+report_params <- reactiveValues(
+       author            = character(),
+       date              = as.Date(character()),
+       n_samples         = numeric(),
+       n_controls        = numeric(),
+       total_rxns        = numeric(),
+       assists           = character(),
+       InputMassStart    = numeric(),
+       Length            = numeric(),
+       fragment_type     = numeric(),
+       strands           = numeric(),
+       InputMassFinal    = numeric(),
+       TemplateVolPrep   = numeric(),
+       TemplateVolLoading= numeric(),
+       LibraryCode       = character(),
+       QC                = tibble(
+         TubeNo      = numeric(),
+         ExtractID   = character(),
+         ExtractConc = numeric(),
+         LibQC1      = numeric(),
+         LibQC2      = numeric()
+       ),
+       setup_note        = character(),
+       conclusion_note   = character(),
+       steps             = list(),
+       libraries         = tibble(),
+       rxns              = tibble(
+         step         = character(),
+         Reagent      = character(),
+         N            = numeric(),
+         Volume_rxn   = numeric(),
+         Volume_total = numeric()
+       )
+  )
+
+
   source(paste0(params$base_path, "server/helper_functions.R"))
   source(paste0(params$base_path, "resources/assets_loader.R"))
   source(paste0(params$base_path, "resources/data_loader.R"))
   source(paste0(params$base_path, "resources/data_gt.R"))
+  source(paste0(params$base_path, "server/dynamic_cards.R"))
   source(paste0(params$base_path, "server/ui_logic.R"))
   source(paste0(params$base_path, "server/reactable_columns.R"))
   source(paste0(params$base_path, "server/observers.R"))
-
+  source(paste0(params$base_path, "server/report_logic.R"))
   
 rxns                  <- reactiveValues(endprep   = rxn_endprep, 
                                         adapter   = rxn_adapter, 
@@ -132,18 +169,8 @@ observe_steps(input, output, session, steps, step_data)
 render_images(output)
 render_dynamic_cards(output)
 
-report_observer(input, output, step_data, file_prefix)
-
-output$download_csv <- downloadHandler(
-    filename = function() {
-      paste0(file_prefix(), ".csv")
-      },
-    content  = function(file) { 
-      req(data$libraries)
-      data_output <- isolate(data$libraries) %>% tibble()
-      write.csv(data_output, file)  
-  }
-)
+observe_setup_note(input, output, report_params)
+observe_rxns(report_params, rxns, n_rxns)
 
 samples_count_ui(input, output, samples.loris)
 adjust_length_ui(output, Length)
@@ -153,17 +180,17 @@ QC1_input_render(output, data, QC1_input_with_check)
 QC2_input_render(output, data, QC2_input_with_check)
 
 count_controls(input, n_controls)
-select_samples(samples.loris, data, n_controls)
+select_samples(samples.loris, data, n_controls, n_samples)
 
 
-observe_exp_submit(input, data, file_prefix)
+observe_exp_submit(input, data, report_params, file_prefix)
 observe_type(input, data, fragment_type, Length, strands, calculate_length, InputMassStart, calculate_mass_start)
 observe_strands(input, strands, InputMassStart, calculate_mass_start, fragment_type, Length)
 observe_length(input, data, Length, fragment_type, strands, InputMassStart, calculate_mass_start)
 observe_input(input, data, InputMassStart)
-observe_recalculate(input, data, n_rxns, rxns, rxn_vols, TemplateVolPrep, TemplateVolLoading, InputMassStart, InputMassFinal, calculate_mass_final, fragment_type, Length, strands)
+observe_recalculate(input, data, report_params, n_rxns, rxns, rxn_vols, TemplateVolPrep, TemplateVolLoading, InputMassStart, InputMassFinal, calculate_mass_final, fragment_type, Length, strands)
 QC1_observer(input, data)
-QC2_observer(input, data, TemplateVolLoading)
+QC2_observer(input, data, TemplateVolLoading, report_params)
 
 output$samples <- renderReactable({
   req(samples.loris)
@@ -216,6 +243,41 @@ output$supplies_cleanup  <- render_gt({supplies_cleanup})
 output$supplies_flowcell <- render_gt({supplies_flowcell})
 output$input_dna         <- render_gt({input_dna})
 output$flowcell_check    <- render_gt({flowcell_check})
+
+updated_samples <- reactiveValues()
+
+observe_conclusion_note(input, output, report_params)
+update_params(input, report_params, data, step_data, sample.list)
+report_observer(input, output, report_params, sample.list, updated_samples)
+
+report_params <- isolate(reactiveValuesToList(reactive({report_params})))
+
+output$download_report <- downloadHandler(
+      filename = function() {
+        paste0(reactive({file_prefix}), "_report.html") },
+      content = function(file) {
+        tempReport <- file.path(tempdir()    , "report.Rmd")
+        template   <- paste0(params$base_path, "resources/report.Rmd")
+        
+        file.copy(template, tempReport, overwrite = TRUE)
+        
+        rmarkdown::render(
+          input       = tempReport, 
+          output_file = file,
+          params      = report_params,
+          envir       = new.env(parent = globalenv())
+        )
+      })
+
+output$download_csv <- downloadHandler(
+      filename = function() {
+        "samples_loris_updated.csv"
+      },
+      content  = function(file) { 
+        data_output <- isolate(as.tibble(reactive({updated_samples})))
+        write.csv(data_output, file)  
+      }
+    )
 
 
 }

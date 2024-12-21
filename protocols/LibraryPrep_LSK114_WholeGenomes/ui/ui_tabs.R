@@ -101,6 +101,7 @@ conclude_tab <- function() {
                  tags$h4("Conclude your notebook entry and export report..."), tags$br(),
                  dateInput("end_date", "End Date", value = Sys.Date(), format = "yyyy-mm-dd"),
                  textAreaInput("end_note", "Notes/Comments"),
+                 textAreaInput("library_code", "Enter a Shorthand Code for this Sequencing Run"),
                  textOutput("end_note_render"),
                  actionButton("generate_report", "Generate Report for Download"),
                  layout_column_wrap(downloadButton("download_csv", "Download Updated Table"), 

@@ -16,14 +16,31 @@ params:
     author: NA
     date: NA
     steps: NA
+    n_samples: NA
+    n_controls: NA
+    total_rxns: NA
+    assists: NA
+    InputMassStart: NA          
+    Length: NA                  
+    fragment_type: NA           
+    strands: NA                 
+    InputMassFinal: NA          
+    TemplateVolPrep: NA         
+    TemplateVolLoading: NA   
+    setup_note: NA
+    conclusion_note: NA  
+    libraries: NA
+    rxns: NA
+    QC: NA
     
 ---
+
 
 ```{r include=FALSE}
 opts_chunk$set(message = FALSE,
                warning = FALSE,
-               echo    = TRUE,
-               include = TRUE,
+               echo    = FALSE,
+               include = FALSE,
                eval    = TRUE)
 
 library(knitr)
@@ -52,6 +69,7 @@ library(xfun)
 ```{r}
 
 tagList(
+        tags$blockquote(params$setup_note),
         tags$ol(
           lapply(params$steps, function(step) {
             tagList(
@@ -61,6 +79,7 @@ tagList(
             tags$hr()
             )
           })
-        )
+        ),
+        tags$blockquote(params$conclusion_note)
       )
 ```
