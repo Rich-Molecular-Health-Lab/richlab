@@ -6,7 +6,18 @@ observe_steps <- function(input, output, session, steps, step_data) {
     step_content <- .x
     main_step    <- step_content[[1]]
     
+    observe({
+      if (is.null(step_data[[step_name]])) {
+        step_data[[step_name]] <- reactiveValues(
+          detail    = main_step,
+          note      = NULL,
+          timestamp = NULL
+        )
+      }
+    })
+    
     observeEvent(input[[paste0("check_", step_name)]], {
+      
       timestamp <- paste(format(Sys.time(), "%Y-%m-%d %H:%M:%S"))
       
       toggleCssClass(id        = paste0("step_", step_name), 
@@ -21,7 +32,9 @@ observe_steps <- function(input, output, session, steps, step_data) {
         }
       })
       
+
       step_data[[step_name]]$timestamp <- paste0("Completed at ", timestamp)
+      
     })
     
     observeEvent(input[[paste0("submit_", step_name)]], {
@@ -34,8 +47,6 @@ observe_steps <- function(input, output, session, steps, step_data) {
           ""
         }
       })
-      
-      # Update note in reactiveValues
       step_data[[step_name]]$note <- paste0(
         "Note recorded at", timestamp, ": ", input[[paste0("text_", step_name)]] 
       )
@@ -45,11 +56,12 @@ observe_steps <- function(input, output, session, steps, step_data) {
 
 count_controls <- function(input, n_controls) {
   observeEvent(input$add_controls, {
+    req(n_controls())
     n_controls(as.integer(input$add_controls %||% 0))
   })
 }
 
-select_samples <- function(samples.loris, data, n_controls, n_samples) {
+select_samples <- function(samples.loris, data, n_controls) {
   
   observeEvent(getReactableState("samples", "selected"), {
     selected <- getReactableState("samples", "selected") %||% integer(0)
@@ -66,8 +78,6 @@ select_samples <- function(samples.loris, data, n_controls, n_samples) {
              ExtractID   = ExtractID_DNA,
              ExtractConc = ExtractConc_DNA,
              SampleID)
-    
-    n_samples(nrow(selected_rows))
     
     control_rows <- tibble(
       TubeNo             = NA_integer_,
@@ -168,7 +178,8 @@ observe_recalculate <- function(input,
                                 calculate_mass_final,
                                 fragment_type,
                                 Length,
-                                strands
+                                strands,
+                                n_controls
 ) {
   observeEvent(input$recalculate, {
     n_rxns(nrow(data$libraries))
@@ -199,7 +210,6 @@ observe_recalculate <- function(input,
       mutate(ExtractInputVol    = if_else((InputMassStart/ExtractConc) >= TemplateVolPrep(), TemplateVolPrep(), InputMassStart/ExtractConc)) %>%
       mutate(ExtractDiluteWater = TemplateVolPrep() - ExtractInputVol)
     
-    report_params$n_samples      <- n_samples()
     report_params$n_controls     <- n_controls()
     report_params$total_rxns     <- n_rxns()
     report_params$InputMassStart <- InputMassStart()
@@ -242,7 +252,7 @@ QC1_observer <- function(input, data) {
   })
 }
 
-QC2_observer <- function(input, data, TemplateVolLoading, report_params) {
+QC2_observer <- function(input, data, TemplateVolPrep, TemplateVolLoading, report_params) {
   observeEvent(input$confirm_qc2, {
     req(data$libraries$TubeNo)  
     data$libraries <- data$libraries %>%

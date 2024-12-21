@@ -1,6 +1,6 @@
 ---
 title: "Lab Notebook Entry"
-author: "`r params$author`"
+author: "`r params$author` with assist by `r params$assists`"
 date: "`r params$date`"
 output: 
   html_document:
@@ -16,7 +16,6 @@ params:
     author: NA
     date: NA
     steps: NA
-    n_samples: NA
     n_controls: NA
     total_rxns: NA
     assists: NA
@@ -27,6 +26,7 @@ params:
     InputMassFinal: NA          
     TemplateVolPrep: NA         
     TemplateVolLoading: NA   
+    LibraryCode: NA
     setup_note: NA
     conclusion_note: NA  
     libraries: NA
@@ -40,7 +40,7 @@ params:
 opts_chunk$set(message = FALSE,
                warning = FALSE,
                echo    = FALSE,
-               include = FALSE,
+               include = TRUE,
                eval    = TRUE)
 
 library(knitr)
@@ -63,15 +63,88 @@ library(usethis)
 library(xfun)
 ```
 
-
-## Library Prep
+## Summary
 
 ```{r}
+tagList(
+  tags$h3(paste0("ID Code for Sequencing Run: "    , params$LibraryCode)),
+  tags$h4(paste0("Total Libraries Prepped: "       , params$total_rxns)),
+  tags$em(paste0("Number of Negative Controls: "   , params$n_controls))
+)
+
+as_tibble(params$libraries) %>%
+  select(
+    LibraryTube,
+    SequenceID,
+    SampleID,
+    CollectionDate,
+    Subject,
+    n_dna_extractions,
+    n_rna_extractions,
+    n_seq_16s) %>%
+  gt() %>%
+  cols_label(
+    LibraryTube        ~ "Tube Label",
+    SequenceID         ~ "Sequenced Library ID",
+    SampleID           ~ "Sample ID",
+    CollectionDate     ~ "Date of Sample Collection",
+    Subject            ~ "Subject Name",
+    n_dna_extractions  ~ "DNA Extracts",
+    n_rna_extractions  ~ "RNA Extracts",
+    n_seq_16s          ~ "16S Libraries"
+  ) %>%
+  tab_spanner(label = "N Completed per Sample", columns = c("n_dna_extractions",
+                                                            "n_rna_extractions",
+                                                            "n_seq_16s")) %>%
+  fmt_date(columns = CollectionDate) %>%
+  opt_stylize(6, "pink")
+```
+
+
+### Reaction Volumes
+
+```{r}
+as_tibble(params$rxns) %>%
+  select(-N) %>%
+  gt(rowname_col = "Reagent", groupname_col = "step") %>%
+  cols_label(
+    Volume_rxn   ~ "Volume per rxn (ul)",
+    Volume_total ~ "Total Volume (ul)"
+  ) %>%
+  summary_rows(columns = c("Volume_rxn", "Volume_total"), fns = "sum") %>%
+  fmt_units()  %>%
+  opt_stylize(6, "pink")
+```
+
+### Quality Control Results
+
+```{r}
+as_tibble(params$QC) %>%
+  gt() %>%
+  cols_label(
+    TubeNo      ~ "Tube Label",
+    ExtractID   ~ "DNA Extract ID",
+    ExtractConc ~ "Initial Extract Concentration (ng/ul)",
+    LibQC1      ~ "Concentration after Endprep (ng/ul)",
+    LibQC2      ~ "Concentration after Adapter Ligation (ng/ul)"
+  ) %>%
+  fmt_units()  %>%
+  opt_stylize(6, "pink")
+```
+
+
+
+
+## Procedure Steps and Notes
+
+```{r}
+steps <- as.list(params$steps)
+
 
 tagList(
         tags$blockquote(params$setup_note),
         tags$ol(
-          lapply(params$steps, function(step) {
+          lapply(steps, function(step) {
             tagList(
             tags$li(step$detail),
             tags$p(step$timestamp),
